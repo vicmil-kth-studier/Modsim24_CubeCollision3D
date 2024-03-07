@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Blog Title</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+        nav {
+            background-color: #f4f4f4;
+            padding: 10px;
+            text-align: center;
+        }
+        nav a {
+            margin: 0 10px;
+            text-decoration: none;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        .post {
+            margin-bottom: 40px;
+        }
+        .post h2 {
+            color: #333;
+        }
+        .post p {
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Cubes in 3D</h1>
+    </header>
+    <nav>
+        <a href="#">Home</a>
+        <a href="#">About</a>
+        <a href="#">Contact</a>
+    </nav>
+    <div class="container">
+        <div class="post">
+            <h2>2 Mars 2024: The project idea</h2>
+            <p>
+                The basic idea of the project is to implement collisions between cubes in 3D. I would also like to make 
+                much of the code reusable for later projects, so I will try to make a library of sorts of help functions
+                and classes.
+            </p>
+            <p>
+                I am planning to write the project in C++ and use OpenGL coupled with SDL for the graphics part. I will also
+                rely on a library called GLM for some of the linear algebra and maths involved in the project.
+            </p>
+            <p>
+                You can see an image below of what I am trying to achieve:
+            </p>
+            <img src="resources/falling_cubes.png" alt="Placeholder Image">
+        </div>
+        <div class="post">
+
+            <h2>3 Mars 2024: Running C++ code in the web</h2>
+            <p>I thought it would be really cool to be able to interact with my project in the web. That way people don't
+                have to download anything. I chose to use C++ for my project, and it turns out that there exists a compiler
+                called emscripten that allows you to compile your code into webassemply that can then be run in the web.
+            </p>
+            <p> I created some simple hello world program and compiled it. The result can be found in the link below:</p>
+            <li><a href="releases/N2_emscripten_hello_world/run.html">releases/N2_emscripten_hello_world/run.html</a></li>
+        </div>
+
+        <div class="post">
+
+            <h2>4 Mars 2024: Add OpenGL and Cube graphics</h2>
+            <p>The project needs to have some way to display the cubes. I had already worked with OpenGL previously, so 
+                I just added some code from a previos project and modified it a bit. I also made sure to add a custom
+                logging and testing library that I had developed to make future development easier.
+            </p>
+            <p> The result can be found below: </p>
+            <li><a href="releases/N2_emscripten_hello_world/run.html">releases/N2_emscripten_hello_world/run.html</a></li>
+        </div>
+
+        <!-- Add more posts as needed -->
+    </div>
+</body>
+</html>
