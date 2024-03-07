@@ -91,8 +91,23 @@ class CppBuilder:
         run_command(command=command)
 
 
-    def setup_emscripten_with_opengl(self, exported_functions: str ="_main", use_assets: bool = False):
-        """Add the necessary parameters to compile with emscripten, and include OpenGL
+    def setup_opengl_for_emscripten(self):
+        """
+            Invoke after setup_emscripten_compiler
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+            None
+        """
+
+
+    def setup_emscripten_compiler(self, exported_functions: str ="_main", use_assets: bool = False, use_openGL: bool = False):
+        """Add the necessary parameters to compile with emscripten
+        Make sure you have emscripten in the deps directory, otherwise this will not work. 
+        Read deps/README.md for instructions
 
         Parameters
         ----------
@@ -107,23 +122,30 @@ class CppBuilder:
                     accessed as regular files. Note! Requires that the active directory is in 
                     the same directory as a folder called "assets" when compiling.
 
+            use_openGL: bool
+                If False: do nothing
+                If True: Add the necessary parameters to include OpenGL and SDL when compiling with emscripten
+                            These libraries are required if you want to do cool graphics. 
+
 
         Returns
         -------
             None
         """
         current_path = path_traverse_up(__file__, 1)
-        self.compiler_path = current_path + "/deps/linux_/emsdk/upstream/emscripten/emcc"
+        self.compiler_path = current_path + "/dependencies/linux_/emsdk/upstream/emscripten/emcc"
 
         self.other_args.append("-O2")
-        #self.other_args.append("-s USE_SDL=2")
-        #self.other_args.append("-s USE_SDL_IMAGE=2")
-        #self.other_args.append("-s EXPORTED_FUNCTIONS=" + exported_functions)
-        #self.other_args.append("-s EXTRA_EXPORTED_RUNTIME_METHODS=ccall,cwrap")
-        #self.other_args.append("""-s SDL2_IMAGE_FORMATS='["png"]'""")
-        #self.other_args.append("-s FULL_ES3=1")
-        #if use_assets:
-        #    self.other_args.append("--preload-file assets")
+
+        if use_openGL:
+            self.other_args.append("-s USE_SDL=2")
+            self.other_args.append("-s USE_SDL_IMAGE=2")
+            self.other_args.append("""-s SDL2_IMAGE_FORMATS='["png"]'""")
+            self.other_args.append("-s FULL_ES3=1")
+
+        self.other_args.append("-s EXPORTED_FUNCTIONS=" + exported_functions)
+        self.other_args.append("-s EXTRA_EXPORTED_RUNTIME_METHODS=ccall,cwrap")
+        
 
 
 def path_traverse_up(path: str, count: int) -> str:

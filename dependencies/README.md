@@ -15,7 +15,7 @@ This project has the following dependencies
         to a number of compiler errors.
 
         Path:
-            deps/linux_/emsdk/
+            dependencies/linux_/emsdk/
 
         Links:
             https://emscripten.org/docs/getting_started/downloads.html
@@ -48,7 +48,7 @@ This project has the following dependencies
             is headers only so it is really easy to include into projects
 
         Path:
-            deps/glm/
+            dependencies/glm/
 
         Links:
             github: https://github.com/g-truc/glm
