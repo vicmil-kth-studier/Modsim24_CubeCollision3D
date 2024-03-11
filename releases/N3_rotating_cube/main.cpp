@@ -21,11 +21,6 @@ void render() {
     for(int i = 0; i < 3; i++) {
         obj_orientation.position.x = -3 + 2.5*i;
         
-        /*PerspectiveMatrixGen mvp_gen;
-        mvp_gen.load_camera_state(vicmil::app_help::app->camera);
-        mvp_gen.load_object_orientation(obj_orientation);
-        glm::mat4 mvp = mvp_gen.get_perspective_matrix_MVP();
-        vicmil::app_help::app->shared_models_buffer.draw_object(graphics_help::BLUE_CUBE_INDEX, mvp, &vicmil::app_help::app->program);*/
         vicmil::app_help::draw_3d_model(graphics_help::BLUE_CUBE_INDEX, obj_orientation, 1.0);
     }
 
@@ -34,12 +29,6 @@ void render() {
     obj_orientation.rotation = glm::mat4(1.0);
 
     vicmil::app_help::draw_3d_model(2, obj_orientation, 0.01);
-    /*PerspectiveMatrixGen mvp_gen;
-    mvp_gen.obj_scale = 0.01;
-    mvp_gen.load_camera_state(vicmil::app_help::app->camera);
-    mvp_gen.load_object_orientation(obj_orientation);
-    glm::mat4 mvp = mvp_gen.get_perspective_matrix_MVP();
-    vicmil::app_help::app->shared_models_buffer.draw_object(2, mvp, &vicmil::app_help::app->program);*/
 }
 
 // Runs at a fixed frame rate
