@@ -30,7 +30,11 @@
                 var e = document.getElementById('loadingDiv');
                 e.style.visibility = 'hidden';
                 console.log("runtime initialized!");
+
+                // Try update screen multiple times(if the program has not fully loaded yet)
                 update_cpp_screen_size();
+                setTimeout(function() { update_cpp_screen_size(); }, 2000);
+                setTimeout(function() { update_cpp_screen_size(); }, 5000);
             }, 
             canvas: (function() {
                 var canvas = document.getElementById('canvas');

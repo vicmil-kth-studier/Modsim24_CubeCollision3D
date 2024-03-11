@@ -3,22 +3,18 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parents[2])) 
 sys.path.append(str(Path(__file__).resolve().parents[0])) 
 
-import build
+import vicmil_lib.N3_vicmil_opengl as build
 
 builder = build.CppBuilder()
 
 current_path = build.path_traverse_up(__file__, 0)
-build.change_active_directory(build.path_traverse_up(__file__, 0))
 
+builder.N1_add_compiler_path_arg(build.emscripten_compiler_path)
+builder.N2_add_cpp_file_arg(current_path + "/main.cpp")
+builder.N9_add_output_file_arg(current_path + "/run.html")
 
-builder.setup_emscripten_compiler()
-builder.cpp_files.append(current_path + "/main.cpp")
-
-builder.output_file = current_path + "/run.html"
-
+build.change_active_directory(current_path)
+build.delete_file("run.html")
 builder.build()
-
-build.launch_html_page(builder.output_file)
-
-build.run_command("./a.out")
+build.launch_html_page("run.html")
 
