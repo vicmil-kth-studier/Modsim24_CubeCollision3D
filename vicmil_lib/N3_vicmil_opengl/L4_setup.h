@@ -25,6 +25,9 @@ public:
 
         Debug("OpenGL version " << glGetString(GL_VERSION));
     }
+    void get_window_size(int* w, int* h) {
+        SDL_GL_GetDrawableSize(window, w, h);
+    }
     ~GraphicsSetup() {
     }
 };

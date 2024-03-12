@@ -41,6 +41,64 @@ public:
 };
 
 /**
+ * converts pixels to opengl format
+ * x = -1 is the left edge in opengl
+ * x = 1 is the right edge in opengl
+ * @param x_pixel The x pixel coordinate(0 is the left)
+ * @param screen_width The screen width in pixels
+*/
+double x_pixel_to_opengl(int x_pixel, int screen_width) {
+    return (2 * ((double)x_pixel) / screen_width) - 1;
+}
+/**
+ * converts pixels to opengl format
+ * y = -1 is the bottom in opengl
+ * y = 1 is the top in opengl
+ * @param y_pixel The y pixel coordinate(0 is the top)
+ * @param screen_height The screen height in pixels
+*/
+double y_pixel_to_opengl(int y_pixel, int screen_height) {
+    return -((2 * ((double)y_pixel) / screen_height) - 1);
+}
+
+/**
+ * Creates a button on the screen that you can check if it is pressed or not
+ * @param start_x: x position on screen, goes from -1 to 1
+ * @param start_y: y position on screen, goes from -1 to 1
+ * @param width: width on screen, goes from 0 to 2
+ * @param height: height on screen, goes from 0 to 2
+*/
+class Button {
+public:
+    double start_x;
+    double start_y;
+    double width;
+    double height;
+    unsigned int screen_width = 1000;
+    unsigned int screen_height = 1000;
+    bool is_pressed(MouseState mouse_state) {
+        double mouse_x = x_pixel_to_opengl(mouse_state.x(), screen_width);
+        double mouse_y = y_pixel_to_opengl(mouse_state.y(), screen_height);
+        if(mouse_state.left_button_is_pressed() == false) {
+            return false;
+        }
+        if(mouse_x < start_x) {
+            return false;
+        }
+        if(mouse_y < start_y) {
+            return false;
+        }
+        if(mouse_x > start_x + width) {
+            return false;
+        }
+        if(mouse_y > start_y + height) {
+            return false;
+        }
+        return true;
+    }
+};
+
+/**
  * Create a way to move the camera around as you press left click and drag
 */
 class CameraMover {

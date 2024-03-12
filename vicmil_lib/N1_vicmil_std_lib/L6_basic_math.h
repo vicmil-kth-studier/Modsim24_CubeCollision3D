@@ -29,4 +29,12 @@ double modulo(double val, double mod) {
         return val - ((int)((val-0.0000001) / mod) - 1) * mod;
     }
 }
+
+double degrees_to_radians(const double deg) {
+    return deg * 2.0 * PI / 360.0;
+}
+
+double radians_to_degrees(const double rad) {
+    return rad * 360.0 / (PI * 2.0);
+}
 }

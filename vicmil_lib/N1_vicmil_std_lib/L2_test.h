@@ -66,8 +66,8 @@ struct TestClass : public FactoryBase {
 #ifdef USE_DEBUG
 #define TestWrapper(test_name, func) \
 namespace test_class { \
-    struct test_name : TestClass { \
-        test_name() : TestClass(TEST_ID) {} \
+    struct test_name : vicmil::TestClass { \
+        test_name() : vicmil::TestClass(TEST_ID) {} \
         func \
     }; \
 } \

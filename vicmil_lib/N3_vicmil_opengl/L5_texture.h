@@ -114,6 +114,14 @@ public:
     }
 
     /**
+     * Bind the texture so it is that texture that is referenced when drawing
+     * @return None
+    */
+    void bind() {
+        glBindTexture(GL_TEXTURE_2D, renderedTexture);
+    }
+
+    /**
      * Set the mode to grab the nearest texture pixel, if texture pixels don't align with screen pixels
      * @return None
     */

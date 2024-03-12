@@ -1991,6 +1991,26 @@ namespace text_letter {
     ".0..."
     "....."
     ".....";
+    const std::string minus = 
+    "....."
+    "....."
+    "....."
+    ".000."
+    "....."
+    "....."
+    "....."
+    "....."
+    ".....";
+    const std::string plus = 
+    "....."
+    "....."
+    "..0.."
+    ".000."
+    "..0.."
+    "....."
+    "....."
+    "....."
+    ".....";
     const std::string question_mark = 
     ".00.."
     "0..0."
@@ -2002,6 +2022,17 @@ namespace text_letter {
     "....."
     ".....";
 
+    const std::string filled = // Not a character, but can by used to make rectangles etc.
+    "00000"
+    "00000"
+    "00000"
+    "00000"
+    "00000"
+    "00000"
+    "00000"
+    "00000"
+    "00000";
+
     const std::string alphabet = 
     A+B+C+D+E+F+G+H+I+J+K+L+M+N+O+P+Q+R+S+T+U+V+W+X+Y+Z+
     a+b+c+d+e+f+g+h+i+j+k+l+m+n+o+p+q+r+s+t+u+v+w+x+y+z+
@@ -2012,7 +2043,10 @@ namespace text_letter {
     comma +
     colon +
     semi_colon +
-    question_mark;
+    minus +
+    plus +
+    question_mark +
+    filled;
 
     const int LETTER_WIDTH = 5;
     const int LETTER_HEIGHT = 9;
@@ -2041,6 +2075,34 @@ namespace text_letter {
             return acc;
         }
         acc++;
+        if(c_ == '!') {
+            return acc;
+        }
+        acc++;
+        if(c_ == '.') {
+            return acc;
+        }
+        acc++;
+        if(c_ == ',') {
+            return acc;
+        }
+        acc++;
+        if(c_ == ':') {
+            return acc;
+        }
+        acc++;
+        if(c_ == ';') {
+            return acc;
+        }
+        acc++;
+        if(c_ == '-') {
+            return acc;
+        }
+        acc++;
+        if(c_ == '+') {
+            return acc;
+        }
+        acc++;
         return acc; // Return question mark if no matches
     }
     struct TexCoord {
@@ -2049,8 +2111,7 @@ namespace text_letter {
         float x2;
         float y2;
     };
-    TexCoord get_texture_coordinate(char c_) {
-        int char_index = get_char_index(c_);
+    TexCoord get_texture_coordinate_from_char_index(int char_index) {
         DebugExpr(char_index);
         TexCoord tex_coord;
         const double letter_height_prop = ((double)text_letter::LETTER_HEIGHT) / text_letter::ALPHABET_TEXTURE_HEIGHT; 
@@ -2061,18 +2122,34 @@ namespace text_letter {
         tex_coord.y2 = (char_index + 1.0) * letter_height_prop;
         return tex_coord;
     }
+    TexCoord get_texture_coordinate(char c_) {
+        int char_index = get_char_index(c_);
+        return get_texture_coordinate_from_char_index(char_index);
+    }
 
+    double get_letter_spacing(double letter_width) {
+        double spacing = 1.0 * letter_width / (double)text_letter::LETTER_WIDTH;
+        return spacing;
+    }
+    double get_letter_width_with_spacing(double letter_width) {
+        return letter_width + get_letter_spacing(letter_width);
+    }
+    double get_letter_height_with_spacing(double letter_width, double screen_aspect_ratio = 1.0) {
+        double letter_height = letter_width * (((double)text_letter::LETTER_HEIGHT) / text_letter::LETTER_WIDTH) * screen_aspect_ratio;
+        return letter_height + get_letter_spacing(letter_width);
+    }
     // x and y is the upper left corner of text on screen
     // -1 < x < 1, -1 < y < 1
-    TextureTraingles get_texture_triangles_from_text(std::string text, double x, double y, double letter_width) {
+    TextureTraingles get_texture_triangles_from_text(std::string text, double x, double y, double letter_width, double screen_aspect_ratio = 1.0) {
         std::vector<TextureTriangleVertex> VERTICIES = {};
         VERTICIES.resize(text.size() * 4);
 
         std::vector<TraingleIndecies> INDICIES = {};
         INDICIES.resize(text.size() * 2);
         
-        double spacing = 1.0 * letter_width / (double)text_letter::LETTER_WIDTH;
-        double letter_height = letter_width * ((double)text_letter::LETTER_HEIGHT) / text_letter::LETTER_WIDTH;
+        double spacing = get_letter_spacing(letter_width);
+        double letter_height_with_spacing = get_letter_height_with_spacing(letter_width, screen_aspect_ratio);
+        double letter_width_with_spacing = get_letter_width_with_spacing(letter_width);
         int x_index = 0;
         int y_index = 0;
         int letter_count = 0;
@@ -2083,10 +2160,10 @@ namespace text_letter {
                 continue;
             }
             TexCoord tex_coord = get_texture_coordinate(text[i]);
-            double x1 = x + x_index * (letter_width + spacing);
-            double y1 = y - (y_index+1) * (letter_height + spacing) + spacing;
-            double x2 = x + (x_index+1) * (letter_width + spacing) - spacing;
-            double y2 = y - y_index * (letter_height + spacing);
+            double x1 = x + x_index * letter_width_with_spacing;
+            double y1 = y - (y_index+1) * letter_height_with_spacing + spacing;
+            double x2 = x + (x_index+1) * letter_width_with_spacing - spacing;
+            double y2 = y - y_index * letter_height_with_spacing;
             VERTICIES[letter_count*4+0] = TextureTriangleVertex(x2, y2, 0.0f, tex_coord.x2, tex_coord.y1); // top right
             VERTICIES[letter_count*4+1] = TextureTriangleVertex(x2, y1, 0.0f, tex_coord.x2, tex_coord.y2); // bottom right
             VERTICIES[letter_count*4+2] = TextureTriangleVertex(x1, y1, 0.0f, tex_coord.x1, tex_coord.y2); // bottom left
@@ -2103,6 +2180,24 @@ namespace text_letter {
 
         TextureTraingles texture_indecies_and_verticies = TextureTraingles(VERTICIES, INDICIES);
 
+        return texture_indecies_and_verticies;
+    }
+    TextureTraingles get_texture_triangle_of_rect(double x, double y, double width, double height) {
+        std::vector<TextureTriangleVertex> VERTICIES = {};
+        VERTICIES.resize(4);
+
+        std::vector<TraingleIndecies> INDICIES = {};
+        INDICIES.resize(2);
+
+        TexCoord tex_coord = get_texture_coordinate_from_char_index(text_letter::LETTER_COUNT - 1); // Get the last latter, e.g filled in rect
+        VERTICIES[0] = TextureTriangleVertex(x + width, y + height, 0.0f, tex_coord.x2, tex_coord.y1); // top right
+        VERTICIES[1] = TextureTriangleVertex(x + width, y, 0.0f, tex_coord.x2, tex_coord.y2); // bottom right
+        VERTICIES[2] = TextureTriangleVertex(x, y, 0.0f, tex_coord.x1, tex_coord.y2); // bottom left
+        VERTICIES[3] = TextureTriangleVertex(x, y + height, 0.0f, tex_coord.x1, tex_coord.y1); // top left 
+        INDICIES[0] =   TraingleIndecies(0, 1, 2);
+        INDICIES[1] = TraingleIndecies(0, 2, 3);
+
+        TextureTraingles texture_indecies_and_verticies = TextureTraingles(VERTICIES, INDICIES);
         return texture_indecies_and_verticies;
     }
     RawImageRGB get_raw_image_of_alphabet() {

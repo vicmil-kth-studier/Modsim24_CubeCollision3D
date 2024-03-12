@@ -88,4 +88,28 @@ public:
         return timer.get_time_since_start_s() * _frames_per_second;
     }
 };
+
+class FPSCounter {
+    Timer timer;
+    unsigned int frame_count = 0;
+    double fps = 0;
+public:
+    FPSCounter() {
+        timer = Timer();
+    }
+    void record_frame() {
+        frame_count += 1;
+        double timer_time = timer.get_time_since_start_s();
+
+        // Reset the timer each second and calculate the fps count
+        if(timer_time > 1.0) {
+            fps = frame_count / timer_time;
+            timer = Timer();
+            frame_count = 0;
+        }
+    }
+    double get_fps() {
+        return fps;
+    }
+};
 }
