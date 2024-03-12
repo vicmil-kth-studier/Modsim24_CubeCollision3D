@@ -14,13 +14,6 @@ bool impulse_applied = false;
 
 const int FPS = 30;
 
-ModelOrientation get_model_orientation_from_obj_trajectory(ObjectTrajectory trajectory) {
-    ModelOrientation orientation;
-    orientation.position = trajectory.orientation.center_of_mass;
-    orientation.rotation = trajectory.orientation.rotational_orientation.to_matrix();
-    return orientation;
-}
-
 void render() {
     clear_screen();
 

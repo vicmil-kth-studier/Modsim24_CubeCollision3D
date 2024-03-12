@@ -1,6 +1,9 @@
 #pragma once
+#define USE_DEBUG
 #include "L2_test.h"
 #include <regex>
+
+
 
 namespace vicmil {
 
@@ -11,6 +14,7 @@ namespace vicmil {
  * @param str_to what we want to replace str_from with
 */
 inline std::string string_replace(const std::string& str, const std::string& str_from, const std::string& str_to) {
+    Debug("hello!");
     DebugExpr(str);
     std::string remaining_string = str;
     std::string new_string = "";

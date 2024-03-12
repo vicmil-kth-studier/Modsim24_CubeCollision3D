@@ -37,4 +37,32 @@ double degrees_to_radians(const double deg) {
 double radians_to_degrees(const double rad) {
     return rad * 360.0 / (PI * 2.0);
 }
+
+/** Returns the amount of overlap between two ranges: (min1, max1) and (min2, max2)
+ * @param min1 The minimum value in range1
+ * @param max1 The maximum value in range1
+ * @param min2 The minimum value in range2
+ * @param max2 The maximum value in range2
+ * @return the amount of overlap between ranges (min1, max1) and (min2, max2)
+*/
+double get_overlap(double min1, double max1, double min2, double max2) {
+    // Scenarios
+    // where (smaller --> greater)
+    // (min1, max1, min2, max2)    -no overlap
+    // (min1, min2, max1, max2)    - overlap
+    // (min1, min2, max2, max1)    - overlap
+
+    // (min2, max2, min1, max1)    -no overlap
+    // (min2, min1, max2, max1)    - overlap
+    // (min2, min1, max1, max2)    - overlap
+
+    // How much do we have to move 1 left to avoid overlap?
+    double left = max1 - min2;
+
+    // How much do we have to move 1 right to avoid overlap?
+    double right = max2 - min1;
+
+
+    return std::min(left, right); // Negative result means there is no overlap!
+}
 }

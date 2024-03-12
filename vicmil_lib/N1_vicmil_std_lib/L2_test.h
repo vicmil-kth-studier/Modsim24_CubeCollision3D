@@ -61,7 +61,7 @@ struct TestClass : public FactoryBase {
     }
 };
 
-#define TEST_ID GetLineKeywords
+#define TEST_ID GetLineIdentifier
 
 #ifdef USE_DEBUG
 #define TestWrapper(test_name, func) \

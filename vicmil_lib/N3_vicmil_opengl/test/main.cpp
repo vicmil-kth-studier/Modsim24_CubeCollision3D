@@ -1,4 +1,5 @@
 #define USE_DEBUG
+#define DEBUG_KEYWORDS ".,!vicmil_std_lib" 
 #include "../vicmil_opengl.h"
 
 int main() {

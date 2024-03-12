@@ -68,6 +68,13 @@ struct ObjectTrajectory {
     }
 };
 
+vicmil::ModelOrientation get_model_orientation_from_obj_trajectory(ObjectTrajectory trajectory) {
+    vicmil::ModelOrientation orientation;
+    orientation.position = trajectory.orientation.center_of_mass;
+    orientation.rotation = trajectory.orientation.rotational_orientation.to_matrix();
+    return orientation;
+}
+
 
 LinearVelocity get_change_in_linear_velocity(Impulse& impulse, ObjectOrientation& orientation, const ObjectShapeProperty& shape_property) {
     DisableLogging
@@ -155,31 +162,6 @@ void apply_impulse(Impulse impulse, ContactPointInfo contact, ObjectTrajectory& 
     trajectory.linear_velocity = trajectory.linear_velocity.add(d_linear_velocity);
     trajectory.rotational_velocity = trajectory.rotational_velocity.add(d_rotational_velocity);
 }
-
-
-double get_linear_kinetic_energy_of_object(double mass_kg, LinearVelocity velocity) {
-    return mass_kg * glm::length2(velocity.speed_m_per_s) / 2.0;
-}
-
-
-double get_rotational_kinetic_energy_of_object(ObjectShapeProperty shape_property, RotationVelocity velocity) {
-    return glm::dot((shape_property.inertia_tensor._matrix * velocity.rotation), velocity.rotation) / 2.0;
-}
-
-
-double get_kinetic_energy_of_object(const ObjectShapeProperty& shape_property, const ObjectTrajectory& trajectory) {
-    double lin_E = get_linear_kinetic_energy_of_object(1.0 / shape_property.inverse_mass_kg, trajectory.linear_velocity);
-    double rot_E = get_rotational_kinetic_energy_of_object(shape_property, trajectory.rotational_velocity);
-    DebugExpr(lin_E);
-    DebugExpr(rot_E);
-    return lin_E + rot_E;
-}
-
-
-double get_height_potential_energy_of_object(double mass_kg, double height_m, double gravitational_contant_m_s2) {
-    return mass_kg * gravitational_contant_m_s2 * height_m;
-}
-
 
 void apply_acceleration(glm::dvec3 acceleration_m_per_s2, double time_s, ObjectTrajectory& trajectory) {
     trajectory.linear_velocity.speed_m_per_s = trajectory.linear_velocity.speed_m_per_s + (acceleration_m_per_s2 * time_s);

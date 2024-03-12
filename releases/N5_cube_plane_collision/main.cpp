@@ -1,3 +1,5 @@
+#define USE_DEBUG
+#define DEBUG_KEYWORDS "!vicmil_lib,init(),main()" 
 #include "../../source/cubecollision_include.h"
 
 using namespace vicmil;
@@ -5,21 +7,13 @@ using namespace vicmil;
 FPSCounter fps_counter;
 
 // Used when applying force
-ObjectTrajectory cube_trajectory;
-ObjectShapeProperty cube_shape;
-
-Impulse impulse;
-ContactPointInfo impulse_contact_point;
-bool impulse_applied = false;
+Cube cube;
+Plane ground_plane;
+glm::dvec3 gravity_m_s2 = glm::dvec3(0, -1, 0);
 
 const int FPS = 30;
-
-ModelOrientation get_model_orientation_from_obj_trajectory(ObjectTrajectory trajectory) {
-    ModelOrientation orientation;
-    orientation.position = trajectory.orientation.center_of_mass;
-    orientation.rotation = trajectory.orientation.rotational_orientation.to_matrix();
-    return orientation;
-}
+bool start_pressed = false;
+double cube_impulse_magnitude = 0;
 
 void render() {
     clear_screen();
@@ -32,14 +26,13 @@ void render() {
     vicmil::app_help::app->camera.screen_aspect_ratio = screen_aspect_ratio;
 
     // Draw cube
-    ModelOrientation cube_orientation = get_model_orientation_from_obj_trajectory(cube_trajectory);
-    vicmil::app_help::draw_3d_model(graphics_help::BLUE_CUBE_INDEX, cube_orientation, 1.0);
+    ModelOrientation cube_orientation = get_model_orientation_from_obj_trajectory(cube.trajectory);
+    vicmil::app_help::draw_3d_model(graphics_help::BLUE_CUBE_INDEX, cube_orientation, 0.5);
 
-
-    // Draw sphere at contact point
+    // Draw ground plane
     ModelOrientation sphere_orientation = ModelOrientation();
-    sphere_orientation.position = impulse_contact_point.contact_position;
-    vicmil::app_help::draw_3d_model(graphics_help::RED_SPHERE_INDEX, sphere_orientation, 0.1);
+    sphere_orientation.position = ground_plane.point;
+    vicmil::app_help::draw_3d_model(graphics_help::RED_PLANE_INDEX, sphere_orientation, 100);
 
 
     fps_counter.record_frame();
@@ -49,6 +42,7 @@ void render() {
     MouseState mouse_state = MouseState();
     info_str += "   x: " + std::to_string(vicmil::x_pixel_to_opengl(mouse_state.x(), screen_width_pixels));
     info_str += "   y: " + std::to_string(vicmil::y_pixel_to_opengl(mouse_state.y(), screen_height_pixels));
+    info_str += "   impulse: " + std::to_string(cube_impulse_magnitude);
 
     vicmil::app_help::draw2d_text(info_str, -1.0, 1.0, 0.02, screen_aspect_ratio);
 
@@ -62,57 +56,64 @@ void render() {
     text_button.screen_height_pixels = screen_height_pixels;
 
     text_button.draw();
-    if(text_button.is_pressed(mouse_state)) {
-        cube_trajectory.orientation.center_of_mass.y += 0.1;
+    if(text_button.is_pressed(mouse_state) && start_pressed == false) {
+        cube.trajectory.orientation.rotational_orientation =
+            cube.trajectory.orientation.rotational_orientation.rotate(Rotation::from_axis_rotation(0.02, glm::dvec3(1, 0, 0)));
     }
 
     text_button.center_y = 0.1;
     text_button.text = "DOWN";
     text_button.draw();
-    if(text_button.is_pressed(mouse_state)) {
-        cube_trajectory.orientation.center_of_mass.y -= 0.1;
+    if(text_button.is_pressed(mouse_state) && start_pressed == false) {
+        cube.trajectory.orientation.rotational_orientation =
+            cube.trajectory.orientation.rotational_orientation.rotate(Rotation::from_axis_rotation(-0.02, glm::dvec3(1, 0, 0)));
     }
 
     text_button.center_y = 0.15;
     text_button.center_x = 0.35;
     text_button.text = "LEFT";
     text_button.draw();
-    if(text_button.is_pressed(mouse_state)) {
-        cube_trajectory.orientation.center_of_mass.x -= 0.1;
+    if(text_button.is_pressed(mouse_state) && start_pressed == false) {
+        cube.trajectory.orientation.rotational_orientation =
+            cube.trajectory.orientation.rotational_orientation.rotate(Rotation::from_axis_rotation(0.02, glm::dvec3(0, 1, 0)));
     }
 
     text_button.center_y = 0.15;
     text_button.center_x = 0.65;
     text_button.text = "RIGHT";
     text_button.draw();
-    if(text_button.is_pressed(mouse_state)) {
-        cube_trajectory.orientation.center_of_mass.x += 0.1;
+    if(text_button.is_pressed(mouse_state) && start_pressed == false) {
+        cube.trajectory.orientation.rotational_orientation =
+            cube.trajectory.orientation.rotational_orientation.rotate(Rotation::from_axis_rotation(-0.02, glm::dvec3(0, 1, 0)));
     }
 
 
     text_button.center_y = -0.6;
     text_button.center_x = 0.5;
-    text_button.text = "APPLY IMPULSE";
+    text_button.text = "START";
     text_button.draw();
-    if(text_button.is_pressed(mouse_state) && impulse_applied == false) {
-        apply_impulse(impulse, impulse_contact_point, cube_trajectory, cube_shape);
-        impulse_applied = true;
+    if(text_button.is_pressed(mouse_state) && start_pressed == false) {
+        start_pressed = true;
     }
 
     vicmil::app_help::draw2d_text(
         "Interact with the simulation using the buttons on the right. \n"
-        "This simulation is about simulating an impact at the red sphere\n"
+        "This simulation is about simulating the cube being dropped on the plane\n"
         "\n"
-        "An impulse will be applied to the cube at the red sphere when \n"
-        "APPLY IMPULSE \n"
+        "The simulation will start when \n"
+        "START \n"
         "is pressed. You can move the cube using the buttons to the right to change\n"
-        "where the impulse is applied", 
+        "the initial position of the cube before it is dropped", 
         -0.9, 0.8, 0.02, screen_aspect_ratio);
 }
 
 // Runs at a fixed framerate
 void game_loop() {
-    cube_trajectory.move_time_step_s(1.0 / FPS);
+    if(start_pressed) {
+        apply_acceleration(gravity_m_s2, 1.0 / FPS, cube.trajectory);
+        cube.trajectory.move_time_step_s(1.0 / FPS);
+        cube_impulse_magnitude = handle_cube_plane_collision(cube, ground_plane, 0.8);
+    }
 }
 
 void init() {
@@ -124,22 +125,18 @@ void init() {
 
 
 
-    cube_trajectory = ObjectTrajectory();
-    cube_trajectory.orientation.center_of_mass.x = 0.0;
-    cube_trajectory.orientation.center_of_mass.y = -2.0;
-    cube_trajectory.orientation.center_of_mass.z = -15.0;
+    cube = Cube();
+    cube.trajectory.orientation.center_of_mass.x = 0.0;
+    cube.trajectory.orientation.center_of_mass.y = 4.0;
+    cube.trajectory.orientation.center_of_mass.z = -15.0;
     
-    double cube_side_length_m = 1;
-    double cube_mass_kg = 10;
-    cube_shape = ObjectShapeProperty::from_cube(cube_side_length_m, cube_mass_kg);
+    cube.side_length_m = 1;
+    cube.mass_kg = 10;
 
-    glm::dvec3 force_newton = glm::dvec3(0, 0, -5);
-    double time_step_s = 1;
-    impulse = Impulse::from_force(force_newton, time_step_s);
+    ground_plane.point = glm::dvec3(0, 0, 0);
+    ground_plane.normal = glm::dvec3(0, 1, 0);
 
-    impulse_contact_point = ContactPointInfo();
-    impulse_contact_point.contact_normal = glm::dvec3(0, 0, 1.0);
-    impulse_contact_point.contact_position = glm::dvec3(0, 0, -14);
+    vicmil::app_help::app->camera.position.y = 6;
 }
 
 

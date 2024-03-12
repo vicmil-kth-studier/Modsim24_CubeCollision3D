@@ -11,7 +11,6 @@ current_path = build.path_traverse_up(__file__, 0)
 
 builder.N1_add_compiler_path_arg(build.emscripten_compiler_path)
 builder.N2_add_cpp_file_arg(current_path + "/main.cpp")
-build.N4_enable_debug_on_keyword(builder=builder, keywords=["."])
 build.N5_emscripten_add_opengl_compiler_settings(builder=builder, exported_functions=["main", "set_screen_size"])
 builder.N9_add_output_file_arg("run.html")
 

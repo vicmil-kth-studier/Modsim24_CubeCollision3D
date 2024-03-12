@@ -18,4 +18,24 @@ bool in_vector(T val, std::vector<T>& vec) {
     }
     return false;
 }
+
+double get_min_in_vector(std::vector<double> vec) {
+    double min_val = vec[0];
+    for(int i = 0; i < vec.size(); i++) {
+        if(vec[i] < min_val) {
+            min_val = vec[i];
+        }
+    }
+    return min_val;
+}
+
+double get_max_in_vector(std::vector<double> vec) {
+    double max_val = vec[0];
+    for(int i = 0; i < vec.size(); i++) {
+        if(vec[i] > max_val) {
+            max_val = vec[i];
+        }
+    }
+    return max_val;
+}
 }

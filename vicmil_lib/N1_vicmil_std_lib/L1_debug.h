@@ -48,37 +48,56 @@ inline bool string_contains(const std::string& str, const std::string& substr) {
     return str.find(substr) != std::string::npos;
 }
 
+/** Determine if a string matches the keywords
+ * Returns false if it does not match any keywords
+ * Returns false if it matches with any prohibited keywords, marked with ! in front
+ * Otherwise, returns true
+*/
+inline bool match_keywords(const std::string str, const std::vector<std::string>& keywords) {
+    bool return_val = false;
+    for(int i = 0; i < keywords.size(); i++) {
+        std::string keyword = keywords[i];
+        if(keyword[0] == '!') { // Reject keyword
+            keyword = keyword.substr(1, std::string::npos);
+            if(string_contains(str, keyword)) {
+                return false;
+            }
+        }
+        else {
+            if(string_contains(str, keyword)) {
+                return_val = true;
+            }
+        }
+    }
+    return return_val;
+}
+
+
+
 /**
  * Get the filename of the current file
 */
-#define GetFileName split_string(__FILE__, '/').back()
-
+#define GetFileName vicmil::split_string(__FILE__, '/').back()
+}
 
 #ifdef DEBUG_KEYWORDS
     const std::string __debug_keywords_raw__ = DEBUG_KEYWORDS;
 #else
-    const std::string __debug_keywords_raw__ = "";
+    const std::string __debug_keywords_raw__ = ".,!vicmil_lib";
 #endif
 
-const std::vector<std::string> __debug_keywords__ = split_string(__debug_keywords_raw__, ',');
+const std::vector<std::string> __debug_keywords__ = vicmil::split_string(__debug_keywords_raw__, ',');
 
-inline bool contains_debug_keyword(const std::string str, const std::vector<std::string>& in_debug_keywords) {
-    //std::cout << "str: " << str << std::endl;
-    for(int i = 0; i < in_debug_keywords.size(); i++) {
-        //std::cout << "in_debug_keywords[i]: " << in_debug_keywords[i] << std::endl;
-        if(string_contains(str, in_debug_keywords[i])) {
-            //std::cout << "true" << std::endl;
-            return true;
-        }
-    }
-    //std::cout << "false" << std::endl;
-    return false;
-}
+namespace vicmil {
+#define GetLineIdentifier GetFileName + " " +  __func__ + "() ln: " + std::to_string(__LINE__) + " " // Used to see if line should be printed
+#define GetLineIdentifierLong std::string(__FILE__) + " " +  __func__ + "() ln: " + std::to_string(__LINE__) + " " // Used to see if line should be printed
 
-#define GetLineKeywords " " + GetFileName + " " +  __func__ + "() ln: " + std::to_string(__LINE__) + " " // Used to see if line should be printed
 #define IfRelevantDebug(x) \
-    if (contains_debug_keyword(GetLineKeywords, __debug_keywords__)) { \
-        x; \
+    { \
+        static const bool __relevant__ = vicmil::match_keywords(GetLineIdentifierLong, __debug_keywords__); \
+        if (__relevant__) { \
+            x; \
+        } \
     }
 
         
