@@ -16,7 +16,7 @@ Contains the meat of the project. i.e. the physics simulation part
 A library that I have developed to help with graphics, testing and debugging. The project is built upon OpenGL and SDL.
 
 ### Dependencies
-All the external dependencies of the project, such as other libraries that need to be downloaded. See Dependencies/README.md for more info
+All the external dependencies of the project, such as other libraries that need to be downloaded if you want to compile everything yourself. See Dependencies/README.md for more info
 
 ### Resources
 Contains some images and such for my blog
