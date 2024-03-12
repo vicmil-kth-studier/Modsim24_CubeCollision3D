@@ -1,13 +1,13 @@
 Here are all the external libraries, compilers etc that are necessary to build and run the project
 
-All the dependencies found in the project can be found below. For each dependency, there exists
-    - Link to the original website from where you can download the material
+All the dependencies found in the project can be found below. For each dependency, there exists a link to the original website from where you can download the material
 
 Just put the files in the appropriate folder
 
 
 
 This project has the following dependencies
+
     emscripten:
         For Compiling c++ so it can run in the web
         Note that the emscripten compiler requires linux to run propperly. There 
