@@ -57,7 +57,7 @@
             <p>
                 The basic idea of the project is to implement collisions between cubes in 3D. I would also like to make 
                 much of the code reusable for later projects, so I will try to make a library of sorts of help functions
-                and classes.
+                and classes. I will call it "vicmil lib" for now.
             </p>
             <p>
                 I am planning to write the project in C++ and use OpenGL coupled with SDL for the graphics part. I will also
@@ -92,7 +92,7 @@
 
         <div class="post">
 
-            <h2>11 Mars 2024: Add Physics</h2>
+            <h2>11 Mars 2024: Add Impulse Physics</h2>
             <p>We now want to play around with the physics of the project, like applying forces to objects.
                 This requires a great deal of maths and physics. Some of these concepts include representing rotation
                 in 3D as well as inertia tensors for calculating how forces affects the object. For some of the
@@ -102,6 +102,25 @@
             </p>
             <p> The result can be found below: </p>
             <li><a href="releases/N4_forces/fullscreen.html">releases/N4_forces/fullscreen.html</a></li>
+        </div>
+
+        <div class="post">
+
+            <h2>11 Mars 2024: Add Collision Physics</h2>
+            <p>We now move on to implementing the collision part of the simulation. We can start simple and have a 
+                cube collide with the ground plane. This builds on our impulse simulation. To resolve the
+                collision requires multiple steps. </p>
+
+                <p>1: determine if the cube is colliding with the ground</p>
+
+                <p>2: separate the cube and the ground(since due to the time steps they might intersect)</p>
+
+                <p>3: calculate the impact position and direction</p>
+
+                <p>4: apply the correct impulse magnitude at the contact</p>
+            </p>
+            <p> The result can be found below: </p>
+            <li><a href="releases/N5_cube_plane_collision/fullscreen.html">releases/N5_cube_plane_collision/fullscreen.html</a></li>
         </div>
 
         <!-- Add more posts as needed -->

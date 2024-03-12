@@ -12,7 +12,7 @@ void render() {
     vicmil::app_help::app->camera.screen_aspect_ratio = vicmil::app_help::globals::screen_width / vicmil::app_help::globals::screen_height;
 
     // Update object
-    Orientation obj_orientation;
+    ModelOrientation obj_orientation;
     obj_orientation.position.z = -15.0;
     obj_orientation.position.y = -2;
     obj_orientation.rotation = glm::rotate(obj_rotation_rad, glm::vec3(0.0, 1.0, 0.0));

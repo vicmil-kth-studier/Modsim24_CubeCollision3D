@@ -171,7 +171,7 @@ namespace vicmil {
             // Perform the drawing
         }
         
-        void draw_3d_model(unsigned int model_index, vicmil::Orientation obj_orientation, double scale = 1.0) {
+        void draw_3d_model(unsigned int model_index, vicmil::ModelOrientation obj_orientation, double scale = 1.0) {
             // Make sure the right shader is loaded
             app->program.bind_program();
             

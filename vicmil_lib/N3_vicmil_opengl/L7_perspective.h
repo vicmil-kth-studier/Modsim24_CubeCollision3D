@@ -2,7 +2,7 @@
 
 namespace vicmil {
 
-class Orientation {
+class ModelOrientation {
 public:
     glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f); // Default to no position change
     glm::mat4 rotation = glm::mat4(1.0f); // Default to no rotation(unit matrix)
@@ -82,7 +82,7 @@ public:
         glm::mat4 view = camera_rotation * get_translation_matrix(-camera_position);
         return projection_matrix * view * model;
     }
-    void load_object_orientation(Orientation& obj_orientation) {
+    void load_object_orientation(ModelOrientation& obj_orientation) {
         obj_rotation = obj_orientation.rotation;
         obj_position = obj_orientation.position;
     }
