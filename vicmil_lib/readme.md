@@ -2,7 +2,9 @@
 ## Description
 This is a library developed by vicmil, with the purpose to be reused in multiple projects.
 
-Compatability is very important, you should only have to write the code once and then run it anywhere. This library can run on both linux, mac, windows AND is compilable with emscripten to run in the browser
+Compatability is very important, you should only have to write the code once and then run it anywhere. This library can run on both linux, mac, windows AND is compilable with emscripten to run in the browser.
+
+(Right now it can only run on linux with emscripten, but it is a work in progress)
 
 ## Usage
 The library is a headers only library, which means that you don't need anything fancy to get started
