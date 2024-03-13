@@ -82,18 +82,93 @@ Overlap get_plane_cube_overlap(Cube& cube, vicmil::Plane& plane) {
     return cube_overlap;
 }
 
-// TODO: make it able to handle other than ground plane
 ContactPointInfo find_cube_plane_contact_point(Cube cube, vicmil::Plane plane) {
     std::vector<glm::dvec3> corners = cube.get_corner_positions();
-    glm::dvec3 lowest_corner = corners[0];
-    for(int i = 1; i < corners.size(); i++) {
-        if(corners[i].y < lowest_corner.y) { // Grab the lowest point
-            lowest_corner = corners[i];
-        }
-    }
+    int lowest_corner = vicmil::get_lowest_point_along_axis(corners, plane.normal);
 
     ContactPointInfo contact_point;
-    contact_point.contact_normal = glm::dvec3(0, 1, 0); // Straigth up from the plane
-    contact_point.contact_position = lowest_corner; // The corner colliding with plane
+    contact_point.contact_normal = plane.normal; // Straigth up from the plane
+    contact_point.contact_position = corners[lowest_corner]; // The corner colliding with plane
     return contact_point;
+}
+
+double get_cube_cube_overlap_along_axis(Cube cube1, Cube cube2, glm::dvec3 axis) {
+    vicmil::Line line;
+    line.point = glm::dvec3(0, 0, 0);
+    line.vector = axis;
+    std::vector<double> cube1_proj = project_cube_to_line(cube1, line);
+    std::vector<double> cube2_proj = project_cube_to_line(cube2, line);
+    double cube1_min = vicmil::get_min_in_vector(cube1_proj);
+    double cube1_max = vicmil::get_max_in_vector(cube1_proj);
+    double cube2_min = vicmil::get_min_in_vector(cube2_proj);
+    double cube2_max = vicmil::get_max_in_vector(cube2_proj);
+    double overlap = vicmil::get_overlap(cube1_min, cube1_max, cube2_min, cube2_max);
+    return overlap;
+}
+
+Overlap get_cube_cube_overlap_along_faces(Cube cube_with_faces, Cube other_cube) {
+    glm::dmat3x3 cube_rotation_matrix = cube_with_faces.trajectory.orientation.rotational_orientation.to_matrix3x3();
+    std::vector<glm::dvec3> cube_face_axis = {
+        glm::dvec3(1, 0, 0) * cube_rotation_matrix,
+        glm::dvec3(0, 1, 0) * cube_rotation_matrix,
+        glm::dvec3(0, 0, 1) * cube_rotation_matrix
+    };
+    
+    glm::dvec3 min_overlap_axis = glm::dvec3(0, 1, 0);
+    double min_overlap = 1000000000; // Some large number
+    for(int i = 0; i < 3; i++) {
+        double overlap = get_cube_cube_overlap_along_axis(cube_with_faces, other_cube, cube_face_axis[i]);
+        if(overlap < min_overlap) {
+            min_overlap = overlap;
+            min_overlap_axis = cube_face_axis[i];
+        }
+    }
+    Overlap overlap;
+    overlap.axis = min_overlap_axis;
+    overlap.overlap = min_overlap;
+    return overlap;
+}
+
+Overlap get_cube_cube_overlap_along_edge_pairs(Cube cube1, Cube cube2) {
+    glm::dmat3x3 cube1_rotation_matrix = cube1.trajectory.orientation.rotational_orientation.to_matrix3x3();
+    glm::dmat3x3 cube2_rotation_matrix = cube2.trajectory.orientation.rotational_orientation.to_matrix3x3();
+    std::vector<glm::dvec3> cube1_face_axis = {
+        glm::dvec3(1, 0, 0) * cube1_rotation_matrix,
+        glm::dvec3(0, 1, 0) * cube1_rotation_matrix,
+        glm::dvec3(0, 0, 1) * cube1_rotation_matrix
+    };
+    std::vector<glm::dvec3> cube2_face_axis = {
+        glm::dvec3(1, 0, 0) * cube2_rotation_matrix,
+        glm::dvec3(0, 1, 0) * cube2_rotation_matrix,
+        glm::dvec3(0, 0, 1) * cube2_rotation_matrix
+    };
+    std::vector<glm::dvec3> edge_pair_axis = {
+        glm::cross(cube1_face_axis[0], cube2_face_axis[0]),
+        glm::cross(cube1_face_axis[0], cube2_face_axis[1]),
+        glm::cross(cube1_face_axis[0], cube2_face_axis[2]),
+        glm::cross(cube1_face_axis[1], cube2_face_axis[0]),
+        glm::cross(cube1_face_axis[1], cube2_face_axis[1]),
+        glm::cross(cube1_face_axis[1], cube2_face_axis[2]),
+        glm::cross(cube1_face_axis[2], cube2_face_axis[0]),
+        glm::cross(cube1_face_axis[2], cube2_face_axis[1]),
+        glm::cross(cube1_face_axis[2], cube2_face_axis[2]),
+    };
+    
+    glm::dvec3 min_overlap_axis = glm::dvec3(0, 1, 0);
+    double min_overlap = 1000000000; // Some large number
+    for(int i = 0; i < 9; i++) {
+        glm::dvec3 axis = edge_pair_axis[i];
+        if(glm::length2(axis) > 0.00001) { // Only pick valid axis
+            axis = glm::normalize(axis);
+            double overlap = get_cube_cube_overlap_along_axis(cube1, cube2, axis);
+            if(overlap < min_overlap) {
+                min_overlap = overlap;
+                min_overlap_axis = axis;
+            }
+        }
+    }
+    Overlap overlap;
+    overlap.axis = min_overlap_axis;
+    overlap.overlap = min_overlap;
+    return overlap;
 }

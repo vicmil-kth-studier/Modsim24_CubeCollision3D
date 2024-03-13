@@ -38,4 +38,12 @@ double get_max_in_vector(std::vector<double> vec) {
     }
     return max_val;
 }
+
+template <class T>
+void vec_remove(std::vector<T>& vec, std::size_t pos)
+{
+    auto it = vec.begin();
+    std::advance(it, pos);
+    vec.erase(it);
+}
 }

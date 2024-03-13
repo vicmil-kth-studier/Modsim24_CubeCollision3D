@@ -13,7 +13,7 @@ glm::dvec3 gravity_m_s2 = glm::dvec3(0, -1, 0);
 
 const int FPS = 30;
 bool start_pressed = false;
-ContactImpulse cube_impulse = ContactImpulse::zero();
+double cube_impulse_magnitude = 0;
 
 void render() {
     clear_screen();
@@ -42,7 +42,7 @@ void render() {
     MouseState mouse_state = MouseState();
     info_str += "   x: " + std::to_string(vicmil::x_pixel_to_opengl(mouse_state.x(), screen_width_pixels));
     info_str += "   y: " + std::to_string(vicmil::y_pixel_to_opengl(mouse_state.y(), screen_height_pixels));
-    info_str += "   impulse: " + std::to_string(glm::length(cube_impulse.impulse.impulse_newton_s));
+    info_str += "   impulse: " + std::to_string(cube_impulse_magnitude);
 
     vicmil::app_help::draw2d_text(info_str, -1.0, 1.0, 0.02, screen_aspect_ratio);
 
@@ -112,7 +112,7 @@ void game_loop() {
     if(start_pressed) {
         apply_acceleration(gravity_m_s2, 1.0 / FPS, cube.trajectory);
         cube.trajectory.move_time_step_s(1.0 / FPS);
-        cube_impulse = handle_cube_plane_collision(cube, ground_plane, 0.8);
+        cube_impulse_magnitude = handle_cube_plane_collision(cube, ground_plane, 0.8);
     }
 }
 

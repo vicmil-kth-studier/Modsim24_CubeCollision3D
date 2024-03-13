@@ -37,7 +37,7 @@ public:
         }
     }
     Rotation rotate(const Rotation& other) const {
-        return Rotation::from_quaternion(this->quaternion * other.quaternion);
+        return Rotation::from_quaternion(other.quaternion * this->quaternion);
     }
     Rotation inverse() const {
         return Rotation::from_quaternion(glm::inverse(this->quaternion));
@@ -48,15 +48,16 @@ public:
         return std::to_string(vicmil::radians_to_degrees(radians)) + "deg, " + glm::to_string(glm::normalize(direction));
     }
     inline glm::dvec3 rotate_vector(const glm::dvec3& vec) const {
-        // TODO: improve implementation
-        glm::dvec4 temp = to_matrix()*glm::dvec4(vec.x, vec.y, vec.z, 1);
-        return glm::dvec3(temp.x, temp.y, temp.z);
+        return to_matrix3x3()*vec;
     }
     inline glm::dvec3 inverse_rotate_vector(const glm::dvec3& vec) const {
-        return vec; // TODO
+        return glm::inverse(to_matrix3x3())*vec;
     }
     inline glm::dmat4x4 to_matrix() const {
         return glm::dmat4x4(quaternion);
+    }
+    inline glm::dmat3x3 to_matrix3x3() const {
+        return glm::dmat3x3(quaternion);
     }
 };
 TestWrapper(TEST1_Rotation,
@@ -187,5 +188,17 @@ public:
         Impulse new_impulse = Impulse();
         new_impulse.impulse_newton_s = force_newton * time_s; // An impulse is just force times time
         return new_impulse;
+    }
+};
+
+/**
+ * An impulse being applied to a point in space
+*/
+class ContactImpulse {
+public:
+    Impulse impulse = Impulse();
+    glm::dvec3 position = glm::dvec3(0, 0, 0);
+    static ContactImpulse zero() {
+        return ContactImpulse();
     }
 };

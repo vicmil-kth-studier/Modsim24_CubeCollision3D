@@ -8,8 +8,7 @@ FPSCounter fps_counter;
 ObjectTrajectory cube_trajectory;
 ObjectShapeProperty cube_shape;
 
-Impulse impulse;
-ContactPointInfo impulse_contact_point;
+ContactImpulse impulse;
 bool impulse_applied = false;
 
 const int FPS = 30;
@@ -31,7 +30,7 @@ void render() {
 
     // Draw sphere at contact point
     ModelOrientation sphere_orientation = ModelOrientation();
-    sphere_orientation.position = impulse_contact_point.contact_position;
+    sphere_orientation.position = impulse.position;
     vicmil::app_help::draw_3d_model(graphics_help::RED_SPHERE_INDEX, sphere_orientation, 0.1);
 
 
@@ -59,36 +58,57 @@ void render() {
         cube_trajectory.orientation.center_of_mass.y += 0.1;
     }
 
-    text_button.center_y = 0.1;
+    text_button.center_y -= 0.1;
     text_button.text = "DOWN";
     text_button.draw();
     if(text_button.is_pressed(mouse_state)) {
         cube_trajectory.orientation.center_of_mass.y -= 0.1;
     }
 
-    text_button.center_y = 0.15;
-    text_button.center_x = 0.35;
+    text_button.center_y -= 0.1;
     text_button.text = "LEFT";
     text_button.draw();
     if(text_button.is_pressed(mouse_state)) {
         cube_trajectory.orientation.center_of_mass.x -= 0.1;
     }
 
-    text_button.center_y = 0.15;
-    text_button.center_x = 0.65;
+    text_button.center_y -= 0.1;
     text_button.text = "RIGHT";
     text_button.draw();
     if(text_button.is_pressed(mouse_state)) {
         cube_trajectory.orientation.center_of_mass.x += 0.1;
     }
 
+    text_button.center_y -= 0.1;
+    text_button.text = "ROTATE1";
+    text_button.draw();
+    if(text_button.is_pressed(mouse_state)) {
+        cube_trajectory.orientation.rotational_orientation = cube_trajectory.orientation.rotational_orientation.rotate(
+            Rotation::from_scaled_axis({0.1, 0.0, 0}));
+    }
 
-    text_button.center_y = -0.6;
-    text_button.center_x = 0.5;
+    text_button.center_y -= 0.1;
+    text_button.text = "ROTATE2";
+    text_button.draw();
+    if(text_button.is_pressed(mouse_state)) {
+        cube_trajectory.orientation.rotational_orientation = cube_trajectory.orientation.rotational_orientation.rotate(
+            Rotation::from_scaled_axis({0, 0.1, 0}));
+    }
+
+    text_button.center_y -= 0.1;
+    text_button.text = "ROTATE3";
+    text_button.draw();
+    if(text_button.is_pressed(mouse_state)) {
+        cube_trajectory.orientation.rotational_orientation = cube_trajectory.orientation.rotational_orientation.rotate(
+            Rotation::from_scaled_axis({0, 0, 0.1}));
+    }
+
+
+    text_button.center_y -= 0.1;
     text_button.text = "APPLY IMPULSE";
     text_button.draw();
     if(text_button.is_pressed(mouse_state) && impulse_applied == false) {
-        apply_impulse(impulse, impulse_contact_point, cube_trajectory, cube_shape);
+        apply_impulse(impulse, cube_trajectory, cube_shape);
         impulse_applied = true;
     }
 
@@ -128,11 +148,8 @@ void init() {
 
     glm::dvec3 force_newton = glm::dvec3(0, 0, -5);
     double time_step_s = 1;
-    impulse = Impulse::from_force(force_newton, time_step_s);
-
-    impulse_contact_point = ContactPointInfo();
-    impulse_contact_point.contact_normal = glm::dvec3(0, 0, 1.0);
-    impulse_contact_point.contact_position = glm::dvec3(0, 0, -14);
+    impulse.impulse = Impulse::from_force(force_newton, time_step_s);
+    impulse.position = glm::dvec3(0, 0, -14);
 }
 
 

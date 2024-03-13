@@ -32,19 +32,16 @@ struct ObjectTrajectory {
     }
     // Move according to trajectory
     void move_time_step_s(double time_step_s) {
-        DisableLogging
         // Update position
         glm::dvec3 d_position = linear_velocity.speed_m_per_s * time_step_s;
         orientation.center_of_mass = orientation.center_of_mass + d_position;
 
         // Update rotation
         glm::dvec3 d_rotation_vec = rotational_velocity.rotation * time_step_s;
-        Debug("d_rotation_vec: " << glm::to_string(d_rotation_vec));
+
+        DebugExpr(glm::to_string(d_rotation_vec));
         Rotation d_rotation = Rotation::from_scaled_axis(d_rotation_vec);
-        Debug("d_quaternion: " << glm::to_string(d_rotation.quaternion));
-        Debug("old quaternion: " << glm::to_string(orientation.rotational_orientation.quaternion));
         orientation.rotational_orientation = orientation.rotational_orientation.rotate(d_rotation);
-        Debug("new quaternion: " << glm::to_string(orientation.rotational_orientation.quaternion));
         orientation.rotational_orientation.quaternion = 
             glm::normalize(orientation.rotational_orientation.quaternion);
     }
@@ -102,9 +99,7 @@ LinearVelocity get_change_in_linear_velocity(Impulse& impulse, ObjectOrientation
 }
 
 
-RotationVelocity get_change_in_rotational_velocity(ContactPointInfo contact, Impulse& impulse, ObjectOrientation& orientation, const ObjectShapeProperty& shape_property) {
-    DisableLogging
-    START_TRACE_FUNCTION();
+RotationVelocity get_change_in_rotational_velocity(ContactImpulse& impulse, ObjectOrientation& orientation, const ObjectShapeProperty& shape_property) {
     // r = p1 - p2
     // J = F * dt
     // dL = r x J
@@ -125,37 +120,48 @@ RotationVelocity get_change_in_rotational_velocity(ContactPointInfo contact, Imp
 
     // Get the relative position of the impulse
     glm::dvec3 rel_pos;
-    rel_pos = contact.contact_position - orientation.center_of_mass;
+    rel_pos = impulse.position - orientation.center_of_mass;
 
     // Get the angular momentum stored in the impulse
-    glm::dvec3 d_momentum = glm::cross(rel_pos, impulse.impulse_newton_s);
+    glm::dvec3 d_momentum = glm::cross(rel_pos, impulse.impulse.impulse_newton_s);
 
-    Debug("d_momentum" << glm::to_string(d_momentum));
+    // TODO: Get the rotated inertia tensor
+    InertiaTensor rotated_inertia_tensor = shape_property.inertia_tensor;
 
-    Debug("get the rotated inertia tensor");
-    Debug("inverse inertia tensor" << glm::to_string(shape_property.inertia_tensor._matrix_inverse));
-
-    // Get the rotated inertia tensor
-    InertiaTensor rotated_inertia_tensor = shape_property.inertia_tensor.rotate(orientation.rotational_orientation);
-
-    Debug("inverse rotated inertia tensor" << glm::to_string(rotated_inertia_tensor._matrix_inverse));
-
-    Debug("get the change in angular velocity");
     // Get the change in angular velocity
     glm::dvec3 d_velocity = rotated_inertia_tensor._matrix_inverse * d_momentum;
 
-    Debug("d_velocity " << glm::to_string(d_velocity));
-
-    END_TRACE_FUNCTION();
     return RotationVelocity::from_vec3(d_velocity);
 }
+TestWrapper(TEST3_get_change_in_rotational_velocity,
+    /** Ensure that the initial rotation of a cube does not affect the rotational velocity
+    */
+    void test() {
+        ContactImpulse impulse;
+        impulse.impulse.impulse_newton_s = glm::dvec3(0, 0, -1);
+        impulse.position = glm::dvec3(10, 5, 2);
+
+        ObjectShapeProperty shape = ObjectShapeProperty::from_cube(1, 1);
+        
+        ObjectOrientation orientation = ObjectOrientation();
+        orientation.rotational_orientation = Rotation();
+        orientation.center_of_mass = glm::dvec3(1, 2, 3);
+        RotationVelocity vel1 = get_change_in_rotational_velocity(impulse, orientation, shape);
+
+        orientation.rotational_orientation = Rotation::from_scaled_axis(glm::dvec3(0.2, 0.1, 0.14));
+        RotationVelocity vel2 = get_change_in_rotational_velocity(impulse, orientation, shape);
+
+        glm::dvec3 diff = vel1.rotation - vel2.rotation;
+        Assert(glm::length(diff) < 0.00001);
+    }
+);
 
 
-void apply_impulse(Impulse impulse, ContactPointInfo contact, ObjectTrajectory& trajectory, const ObjectShapeProperty& shape_property) {
+void apply_impulse(ContactImpulse impulse, ObjectTrajectory& trajectory, const ObjectShapeProperty& shape_property) {
     Debug("Get change in velocities");
     // Get change in velocities
-    LinearVelocity d_linear_velocity = get_change_in_linear_velocity(impulse, trajectory.orientation, shape_property);
-    RotationVelocity d_rotational_velocity = get_change_in_rotational_velocity(contact, impulse, trajectory.orientation, shape_property);
+    LinearVelocity d_linear_velocity = get_change_in_linear_velocity(impulse.impulse, trajectory.orientation, shape_property);
+    RotationVelocity d_rotational_velocity = get_change_in_rotational_velocity(impulse, trajectory.orientation, shape_property);
 
     Debug("Add to old velocities");
     // Add change in velocities to old velocity
