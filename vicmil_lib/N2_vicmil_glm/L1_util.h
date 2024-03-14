@@ -101,12 +101,12 @@ void get_closest_points_between_two_lines(Line line1, Line line2, glm::dvec3* po
     glm::dvec4 row3 = glm::dvec4(line1.vector.z, line_segment.z, -line2.vector.z, line2.point.z - line1.point.z);
 
     // Solve first column
-    if(row1[0] == 0 && row2[0] != 0) {
+    if(abs(row1[0]) < 0.001 && abs(row2[0]) > 0.001) {
         glm::dvec4 tmp = row1;
         row1 = row2;
         row2 = tmp;
     }
-    else if(row1[0] == 0 && row3[0] != 0) {
+    else if(abs(row1[0]) < 0.001 && abs(row3[0]) > 0.001) {
         glm::dvec4 tmp = row1;
         row1 = row3;
         row3 = tmp;
@@ -116,7 +116,7 @@ void get_closest_points_between_two_lines(Line line1, Line line2, glm::dvec3* po
     row3 -= row1 * row3[0];
 
     // Solve second column
-    if(row2[0] == 0 && row3[0] != 0) {
+    if(abs(row2[1]) < 0.001 && abs(row3[1]) > 0.001) {
         glm::dvec4 tmp = row2;
         row2 = row3;
         row3 = tmp;
@@ -158,12 +158,12 @@ void get_closest_points_between_two_lines(Line line1, Line line2, glm::dvec3* po
     Assert(abs(row2[2] - 0) < 0.00001);
     Assert(abs(row3[2] - 1) < 0.00001);
 
-    double t1 = row1[0];
-    double t2 = row2[1];
-    double t3 = row3[2];
+    double t1 = row1[3];
+    double t2 = row2[3];
+    double t3 = row3[3];
 
     *point1 = line1.point + line1.vector * t1;
-    *point2 = line2.point + line1.vector * t3;
+    *point2 = line2.point + line2.vector * t3;
 
     Assert(glm::length(*point1 + line_segment*t2 - *point2) < 0.00001)
 

@@ -73,7 +73,7 @@ vicmil::ModelOrientation get_model_orientation_from_obj_trajectory(ObjectTraject
 }
 
 
-LinearVelocity get_change_in_linear_velocity(Impulse& impulse, ObjectOrientation& orientation, const ObjectShapeProperty& shape_property) {
+LinearVelocity get_change_in_linear_velocity(const Impulse& impulse, ObjectOrientation& orientation, const ObjectShapeProperty& shape_property) {
     DisableLogging
     START_TRACE_FUNCTION();
     // The physics
@@ -99,7 +99,7 @@ LinearVelocity get_change_in_linear_velocity(Impulse& impulse, ObjectOrientation
 }
 
 
-RotationVelocity get_change_in_rotational_velocity(ContactImpulse& impulse, ObjectOrientation& orientation, const ObjectShapeProperty& shape_property) {
+RotationVelocity get_change_in_rotational_velocity(const ContactImpulse& impulse, ObjectOrientation& orientation, const ObjectShapeProperty& shape_property) {
     // r = p1 - p2
     // J = F * dt
     // dL = r x J
@@ -157,7 +157,7 @@ TestWrapper(TEST3_get_change_in_rotational_velocity,
 );
 
 
-void apply_impulse(ContactImpulse impulse, ObjectTrajectory& trajectory, const ObjectShapeProperty& shape_property) {
+void apply_impulse(const ContactImpulse impulse, ObjectTrajectory& trajectory, const ObjectShapeProperty& shape_property) {
     Debug("Get change in velocities");
     // Get change in velocities
     LinearVelocity d_linear_velocity = get_change_in_linear_velocity(impulse.impulse, trajectory.orientation, shape_property);

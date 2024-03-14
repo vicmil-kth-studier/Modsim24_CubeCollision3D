@@ -36,6 +36,25 @@ public:
             return Rotation::from_quaternion(new_quaternion);
         }
     }
+    inline static Rotation from_rotation_of_vectors(const glm::dvec3 vec_from, const glm::dvec3 vec_to) {
+        // Vectors must be normalized!
+        Assert(abs(glm::length(vec_from) - 1) < 0.0001);
+        Assert(abs(glm::length(vec_to) - 1) < 0.0001);
+        if(vec_from == vec_to) {
+            return Rotation();
+        }
+        glm::dvec3 rotation_axis = glm::cross(vec_from, vec_to);
+        if(glm::length(rotation_axis) == 0) {
+            // 180 degree rotation, any direction that is orthogonal
+            glm::dvec3 rotation_axis = glm::dvec3(vec_from.y, vec_from.x, vec_from.z);
+            return Rotation::from_axis_rotation(vicmil::PI, rotation_axis);
+        }
+
+        // Determine how many degrees to rotate
+        double cos_ = glm::dot(vec_from, vec_to);
+        double rads = std::acos(cos_);
+        return Rotation::from_axis_rotation(rads, rotation_axis);
+    }
     Rotation rotate(const Rotation& other) const {
         return Rotation::from_quaternion(other.quaternion * this->quaternion);
     }
