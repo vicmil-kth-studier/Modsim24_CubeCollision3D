@@ -1,5 +1,5 @@
 #define USE_DEBUG
-#define DEBUG_KEYWORDS "!vicmil_lib,init(),main()" 
+#define DEBUG_KEYWORDS "!vicmil_lib,init(),main(),handle_cube_cube_collision" 
 #include "../../source/cubecollision_include.h"
 
 using namespace vicmil;
@@ -7,13 +7,12 @@ using namespace vicmil;
 FPSCounter fps_counter;
 
 // Used when applying force
-Cube cube;
+std::vector<Cube> cubes;
 Plane ground_plane;
 glm::dvec3 gravity_m_s2 = glm::dvec3(0, -1, 0);
 
 const int FPS = 30;
 bool start_pressed = false;
-double cube_impulse_magnitude = 0;
 
 void render() {
     clear_screen();
@@ -25,14 +24,16 @@ void render() {
     double screen_aspect_ratio = vicmil::app_help::globals::screen_width / vicmil::app_help::globals::screen_height;
     vicmil::app_help::app->camera.screen_aspect_ratio = screen_aspect_ratio;
 
-    // Draw cube
-    ModelOrientation cube_orientation = get_model_orientation_from_obj_trajectory(cube.trajectory);
-    vicmil::app_help::draw_3d_model(graphics_help::BLUE_CUBE_INDEX, cube_orientation, 0.5);
+    // Draw cubes
+    for(int i = 0; i < cubes.size(); i++) {
+        ModelOrientation cube_orientation = get_model_orientation_from_obj_trajectory(cubes[i].trajectory);
+        vicmil::app_help::draw_3d_model(graphics_help::BLUE_CUBE_INDEX, cube_orientation, 0.5);
+    }
 
     // Draw ground plane
-    ModelOrientation sphere_orientation = ModelOrientation();
-    sphere_orientation.position = ground_plane.point;
-    vicmil::app_help::draw_3d_model(graphics_help::RED_PLANE_INDEX, sphere_orientation, 100);
+    ModelOrientation ground_orientation = ModelOrientation();
+    ground_orientation.position = ground_plane.point;
+    vicmil::app_help::draw_3d_model(graphics_help::RED_PLANE_INDEX, ground_orientation, 100);
 
 
     fps_counter.record_frame();
@@ -42,54 +43,19 @@ void render() {
     MouseState mouse_state = MouseState();
     info_str += "   x: " + std::to_string(vicmil::x_pixel_to_opengl(mouse_state.x(), screen_width_pixels));
     info_str += "   y: " + std::to_string(vicmil::y_pixel_to_opengl(mouse_state.y(), screen_height_pixels));
-    info_str += "   impulse: " + std::to_string(cube_impulse_magnitude);
 
     vicmil::app_help::draw2d_text(info_str, -1.0, 1.0, 0.02, screen_aspect_ratio);
 
     // Create buttons for moving around
+    // Create buttons for moving around
     vicmil::app_help::TextButton text_button;
-    text_button.text = "UP";
     text_button.center_x = 0.5;
     text_button.center_y = 0.2;
     text_button.letter_width = 0.03;
     text_button.screen_width_pixels = screen_width_pixels;
     text_button.screen_height_pixels = screen_height_pixels;
 
-    text_button.draw();
-    if(text_button.is_pressed(mouse_state) && start_pressed == false) {
-        cube.trajectory.orientation.rotational_orientation =
-            cube.trajectory.orientation.rotational_orientation.rotate(Rotation::from_axis_rotation(0.02, glm::dvec3(1, 0, 0)));
-    }
-
-    text_button.center_y = 0.1;
-    text_button.text = "DOWN";
-    text_button.draw();
-    if(text_button.is_pressed(mouse_state) && start_pressed == false) {
-        cube.trajectory.orientation.rotational_orientation =
-            cube.trajectory.orientation.rotational_orientation.rotate(Rotation::from_axis_rotation(-0.02, glm::dvec3(1, 0, 0)));
-    }
-
-    text_button.center_y = 0.15;
-    text_button.center_x = 0.35;
-    text_button.text = "LEFT";
-    text_button.draw();
-    if(text_button.is_pressed(mouse_state) && start_pressed == false) {
-        cube.trajectory.orientation.rotational_orientation =
-            cube.trajectory.orientation.rotational_orientation.rotate(Rotation::from_axis_rotation(0.02, glm::dvec3(0, 1, 0)));
-    }
-
-    text_button.center_y = 0.15;
-    text_button.center_x = 0.65;
-    text_button.text = "RIGHT";
-    text_button.draw();
-    if(text_button.is_pressed(mouse_state) && start_pressed == false) {
-        cube.trajectory.orientation.rotational_orientation =
-            cube.trajectory.orientation.rotational_orientation.rotate(Rotation::from_axis_rotation(-0.02, glm::dvec3(0, 1, 0)));
-    }
-
-
-    text_button.center_y = -0.6;
-    text_button.center_x = 0.5;
+    text_button.center_y -= 0.1;
     text_button.text = "START";
     text_button.draw();
     if(text_button.is_pressed(mouse_state) && start_pressed == false) {
@@ -110,9 +76,17 @@ void render() {
 // Runs at a fixed framerate
 void game_loop() {
     if(start_pressed) {
-        apply_acceleration(gravity_m_s2, 1.0 / FPS, cube.trajectory);
-        cube.trajectory.move_time_step_s(1.0 / FPS);
-        cube_impulse_magnitude = handle_cube_plane_collision(cube, ground_plane, 0.8);
+        for(int i = 0; i < cubes.size(); i++) {
+            apply_acceleration(gravity_m_s2, 1.0 / FPS, cubes[i].trajectory);
+            cubes[i].trajectory.move_time_step_s(1.0 / FPS);
+        }
+
+        for(int i = 0; i < cubes.size(); i++) {
+            for(int i2 = 0; i2 < i; i2++) {
+                handle_cube_cube_collision(cubes[i], cubes[i2], 1.0);
+            }
+            handle_cube_plane_collision(cubes[i], ground_plane, 0.8);
+        }
     }
 }
 
@@ -123,15 +97,26 @@ void init() {
     vicmil::app_help::set_game_updates_per_second(FPS);
     fps_counter = FPSCounter();
 
+    cubes.resize(10);
 
+    srand(time(0));
 
-    cube = Cube();
-    cube.trajectory.orientation.center_of_mass.x = 0.0;
-    cube.trajectory.orientation.center_of_mass.y = 4.0;
-    cube.trajectory.orientation.center_of_mass.z = -15.0;
-    
-    cube.side_length_m = 1;
-    cube.mass_kg = 10;
+    for(int i = 0; i < cubes.size(); i++) {
+        cubes[i] = Cube();
+        cubes[i].trajectory.orientation.center_of_mass.x = -2.0;
+        cubes[i].trajectory.orientation.center_of_mass.y = 4.0;
+        cubes[i].trajectory.orientation.center_of_mass.z = -15.0;
+        cubes[i].trajectory.orientation.center_of_mass += glm::dvec3((rand()%120)/40.0, (rand()%120)/20.0, (rand()%120)/40.0);
+
+        // Setup random rotation
+        double rad = 2 * vicmil::PI * (rand()%100) / 100.0;
+        glm::dvec3 axis = glm::dvec3((rand()%10000) / 10000.0, (rand()%10000) / 10000.0, (rand()%10000) / 10000.0);
+        cubes[i].trajectory.orientation.rotational_orientation = Rotation::from_axis_rotation(rad, glm::normalize(axis));
+        
+        // Setup other properties
+        cubes[i].side_length_m = 1;
+        cubes[i].mass_kg = 10;
+    }
 
     ground_plane.point = glm::dvec3(0, 0, 0);
     ground_plane.normal = glm::dvec3(0, 1, 0);

@@ -77,8 +77,9 @@ double project_point_to_line(glm::dvec3 point, Line& line) {
 void get_closest_points_between_two_lines(Line line1, Line line2, glm::dvec3* point1, glm::dvec3* point2) {
     glm::dvec3 line_segment = glm::cross(line1.vector, line2.vector);
     if(glm::length2(line_segment) < 0.00001) {
-        // This means the lines are parallell
-        ThrowNotImplemented();
+        // This means the lines are parallell, TODO fix implementation
+        *point1 = line1.point;
+        *point2 = line2.point;
         return;
     }
 
