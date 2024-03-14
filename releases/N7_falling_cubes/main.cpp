@@ -64,12 +64,11 @@ void render() {
 
     vicmil::app_help::draw2d_text(
         "Interact with the simulation using the buttons on the right. \n"
-        "This simulation is about simulating the cube being dropped on the plane\n"
+        "This simulation is about simulating the cubes being dropped on the plane\n"
         "\n"
         "The simulation will start when \n"
         "START \n"
-        "is pressed. You can move the cube using the buttons to the right to change\n"
-        "the initial position of the cube before it is dropped", 
+        "is pressed.",
         -0.9, 0.8, 0.02, screen_aspect_ratio);
 }
 
