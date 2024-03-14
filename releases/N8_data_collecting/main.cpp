@@ -62,6 +62,14 @@ void render() {
         start_pressed = true;
     }
 
+    text_button.center_y -= 0.1;
+    text_button.text = "DOWNLOAD DATA";
+    text_button.draw();
+    if(text_button.is_pressed(mouse_state) && start_pressed == false) {
+        vicmil::browser::alert("Hello from c++");
+        vicmil::browser::download_text_file("data.txt", "Put all the good data stuffs here");
+    }
+
     vicmil::app::draw2d_text(
         "Interact with the simulation using the buttons on the right. \n"
         "This simulation is about simulating the cubes being dropped on the plane\n"

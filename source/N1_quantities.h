@@ -1,5 +1,5 @@
 #pragma once
-#include "../vicmil_lib/N3_vicmil_opengl/vicmil_opengl.h"
+#include "../vicmil_lib/N4_vicmil_emscripten/vicmil_emscripten.h"
 
 class Rotation {
 public:

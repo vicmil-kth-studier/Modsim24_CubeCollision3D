@@ -5,7 +5,6 @@
 #include <SDL2/SDL_image.h>
 #define GL_GLEXT_PROTOTYPES 1
 #include <SDL_opengles2.h>
-#include <emscripten.h>
 #include "../../dependencies/glm/glm/glm.hpp"
 #include "../../dependencies/glm/glm/gtc/matrix_transform.hpp"
 #include "../../dependencies/glm/glm/gtx/transform.hpp"

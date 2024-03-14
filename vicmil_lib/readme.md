@@ -19,4 +19,7 @@ The library is split into 3 parts, with regards to what dependencies are require
     This assumes you have glm installed, another headers only library that contains linear algebra. 
 
 ### N3_vicmil_opengl:
-    This assumes you have SDL2 as well as OpenGL 1.0 installed in order to work. With this library you can do 3D graphics, handle user input etc. If you want to compile for the browser, make sure you have emscripten installed!
+    This assumes you have SDL2 as well as OpenGL 1.0 installed in order to work. With this library you can do 3D graphics, handle user input etc. 
+    
+### N4_vicmil_emscripten:
+    This assumes you have emscripten installed in order to work. With this library you can write code for the browser and interract with the browser, such as sending alerts, downloading files etc.

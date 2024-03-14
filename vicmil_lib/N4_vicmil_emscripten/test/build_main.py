@@ -1,7 +1,7 @@
 import sys; from pathlib import Path; 
 sys.path.append(str(Path(__file__).resolve().parents[2])) 
 
-import N3_vicmil_opengl as build
+import N4_vicmil_emscripten as build
 
 builder = build.CppBuilder()
 

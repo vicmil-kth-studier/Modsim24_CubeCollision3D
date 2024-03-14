@@ -9,7 +9,7 @@ void render() {
 
     // Update camera
     camera_mover.update();
-    vicmil::app_help::app->camera.screen_aspect_ratio = vicmil::app_help::globals::screen_width / vicmil::app_help::globals::screen_height;
+    vicmil::app::globals::main_app->camera.screen_aspect_ratio = vicmil::app::globals::screen_width / vicmil::app::globals::screen_height;
 
     // Update object
     ModelOrientation obj_orientation;
@@ -21,14 +21,14 @@ void render() {
     for(int i = 0; i < 3; i++) {
         obj_orientation.position.x = -3 + 2.5*i;
         
-        vicmil::app_help::draw_3d_model(graphics_help::BLUE_CUBE_INDEX, obj_orientation, 1.0);
+        vicmil::app::draw_3d_model(graphics_help::BLUE_CUBE_INDEX, obj_orientation, 1.0);
     }
 
-    glm::vec3 view_vector = vicmil::app_help::app->camera.get_camera_view_vector();
-    obj_orientation.position = view_vector + vicmil::app_help::app->camera.position;
+    glm::vec3 view_vector = vicmil::app::globals::main_app->camera.get_camera_view_vector();
+    obj_orientation.position = view_vector + vicmil::app::globals::main_app->camera.position;
     obj_orientation.rotation = glm::mat4(1.0);
 
-    vicmil::app_help::draw_3d_model(2, obj_orientation, 0.01);
+    vicmil::app::draw_3d_model(2, obj_orientation, 0.01);
 }
 
 // Runs at a fixed frame rate
@@ -38,16 +38,16 @@ void game_loop() {
 
 void init() {
     Debug("C++ init!");
-    vicmil::app_help::set_render_func(app_help::VoidFuncRef(render));
-    vicmil::app_help::set_game_update_func(app_help::VoidFuncRef(game_loop));
-    vicmil::app_help::set_game_updates_per_second(30);
-    camera_mover.camera = &vicmil::app_help::app->camera;
+    vicmil::app::set_render_func(VoidFuncRef(render));
+    vicmil::app::set_game_update_func(VoidFuncRef(game_loop));
+    vicmil::app::set_game_updates_per_second(30);
+    camera_mover.camera = &vicmil::app::globals::main_app->camera;
 }
 
 
 // Handle emscripten
 void emscripten_update() {
-    vicmil::app_help::emscripten_loop_handler(vicmil::app_help::VoidFuncRef(init));
+    vicmil::app::app_loop_handler(vicmil::VoidFuncRef(init));
 }
 int main(int argc, char *argv[]) {
     Debug("Main!");

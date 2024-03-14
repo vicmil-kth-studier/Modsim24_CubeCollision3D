@@ -1,5 +1,5 @@
 #define USE_DEBUG
-#define DEBUG_KEYWORDS "!vicmil_lib,init(),main()" 
+#define DEBUG_KEYWORDS "!vicmil_lib,init(),main(),handle_cube_cube_collision" 
 #include "../../source/cubecollision_include.h"
 
 using namespace vicmil;
@@ -21,18 +21,18 @@ void render() {
     // Update camera
     int screen_width_pixels;
     int screen_height_pixels;
-    vicmil::app_help::app->graphics_setup.get_window_size(&screen_width_pixels, &screen_height_pixels);
-    double screen_aspect_ratio = vicmil::app_help::globals::screen_width / vicmil::app_help::globals::screen_height;
-    vicmil::app_help::app->camera.screen_aspect_ratio = screen_aspect_ratio;
+    vicmil::app::globals::main_app->graphics_setup.get_window_size(&screen_width_pixels, &screen_height_pixels);
+    double screen_aspect_ratio = vicmil::app::globals::screen_width / vicmil::app::globals::screen_height;
+    vicmil::app::globals::main_app->camera.screen_aspect_ratio = screen_aspect_ratio;
 
     // Draw cube
     ModelOrientation cube_orientation = get_model_orientation_from_obj_trajectory(cube.trajectory);
-    vicmil::app_help::draw_3d_model(graphics_help::BLUE_CUBE_INDEX, cube_orientation, 0.5);
+    vicmil::app::draw_3d_model(graphics_help::BLUE_CUBE_INDEX, cube_orientation, 0.5);
 
     // Draw ground plane
     ModelOrientation sphere_orientation = ModelOrientation();
     sphere_orientation.position = ground_plane.point;
-    vicmil::app_help::draw_3d_model(graphics_help::RED_PLANE_INDEX, sphere_orientation, 100);
+    vicmil::app::draw_3d_model(graphics_help::RED_PLANE_INDEX, sphere_orientation, 100);
 
 
     fps_counter.record_frame();
@@ -44,10 +44,10 @@ void render() {
     info_str += "   y: " + std::to_string(vicmil::y_pixel_to_opengl(mouse_state.y(), screen_height_pixels));
     info_str += "   impulse: " + std::to_string(glm::length(cube_impulse.impulse.impulse_newton_s));
 
-    vicmil::app_help::draw2d_text(info_str, -1.0, 1.0, 0.02, screen_aspect_ratio);
+    vicmil::app::draw2d_text(info_str, -1.0, 1.0, 0.02, screen_aspect_ratio);
 
     // Create buttons for moving around
-    vicmil::app_help::TextButton text_button;
+    vicmil::app::TextButton text_button;
     text_button.text = "UP";
     text_button.center_x = 0.5;
     text_button.center_y = 0.2;
@@ -96,7 +96,7 @@ void render() {
         start_pressed = true;
     }
 
-    vicmil::app_help::draw2d_text(
+    vicmil::app::draw2d_text(
         "Interact with the simulation using the buttons on the right. \n"
         "This simulation is about simulating the cube being dropped on the plane\n"
         "\n"
@@ -118,12 +118,10 @@ void game_loop() {
 
 void init() {
     Debug("C++ init!");
-    vicmil::app_help::set_render_func(app_help::VoidFuncRef(render));
-    vicmil::app_help::set_game_update_func(app_help::VoidFuncRef(game_loop));
-    vicmil::app_help::set_game_updates_per_second(FPS);
+    vicmil::app::set_render_func(VoidFuncRef(render));
+    vicmil::app::set_game_update_func(VoidFuncRef(game_loop));
+    vicmil::app::set_game_updates_per_second(FPS);
     fps_counter = FPSCounter();
-
-
 
     cube = Cube();
     cube.trajectory.orientation.center_of_mass.x = 0.0;
@@ -136,13 +134,13 @@ void init() {
     ground_plane.point = glm::dvec3(0, 0, 0);
     ground_plane.normal = glm::dvec3(0, 1, 0);
 
-    vicmil::app_help::app->camera.position.y = 6;
+    vicmil::app::globals::main_app->camera.position.y = 6;
 }
 
 
 // Handle emscripten
 void emscripten_update() {
-    vicmil::app_help::emscripten_loop_handler(vicmil::app_help::VoidFuncRef(init));
+    vicmil::app::app_loop_handler(vicmil::VoidFuncRef(init));
 }
 int main(int argc, char *argv[]) {
     Debug("Main!");
