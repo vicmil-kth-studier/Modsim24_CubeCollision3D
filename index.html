@@ -91,7 +91,7 @@
         <div class="post">
 
             <h2>11 Mars 2024: Add Impulse Physics</h2>
-            <p>We now want to play around with the physics of the project, like applying forces to objects.
+            <p>For the next part, I wanted to start with the physics of the project, like applying forces to objects.
                 This requires a great deal of maths and physics. Some of these concepts include representing rotation
                 in 3D as well as inertia tensors for calculating how forces affects the object. For some of the
                 basic maths such as linear algebra, I decided to use a library called glm.
@@ -105,8 +105,8 @@
         <div class="post">
 
             <h2>12 Mars 2024: Add Collision Physics</h2>
-            <p>We now move on to implementing the collision part of the simulation. We can start simple and have a 
-                cube collide with the ground plane. This builds on our impulse simulation. To resolve the
+            <p>To build on the simulation, I started to implementing the collision part of the simulation. To start simple I created a 
+                cube that is colliding with the ground plane. This builds on the impulse simulation in the previous post. Resolving the
                 collision requires multiple steps. </p>
 
                 <p>1: determine if the cube is colliding with the ground</p>
@@ -124,9 +124,8 @@
         <div class="post">
 
             <h2>13 Mars 2024: Create Two Cube Collision </h2>
-            <p>Now we would like to have two cubes collide with each other. 
-                This requires that we can calculate if and where cubes collide 
-                with each other. We also need to apply the appropriate forces. </p>
+            <p>For this part, I wanted to start experimenting with having two cubes collide with each other. 
+                This requires that the simulation can calculate if and where cubes collide. It also needs to apply the appropriate forces. </p>
             </p>
             <p> The result can be found below: </p>
             <li><a href="releases/N6_colliding_cubes/fullscreen.html">releases/N6_colliding_cubes/fullscreen.html</a></li>
@@ -135,8 +134,8 @@
         <div class="post">
 
             <h2>13 Mars 2024: Create Falling Cubes Simulation </h2>
-            <p>For the next part I wanted to complete what we initially set out to do when we started the project; 
-                creating falling cubes! To do this, we will place some cubes at random locations and drop them and handle
+            <p>For the next part I wanted to complete what I initially set out to do when I started the project; 
+                creating falling cubes! To do this, I placed some cubes at random locations and dropped them. The simulation then handles
                 all the collisions.  </p>
             </p>
             <p> The result can be found below: </p>
