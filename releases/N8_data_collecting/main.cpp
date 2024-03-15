@@ -67,7 +67,13 @@ void render() {
     text_button.draw();
     if(text_button.is_pressed(mouse_state) && start_pressed == false) {
         vicmil::browser::alert("Hello from c++");
-        vicmil::browser::download_text_file("data.txt", "Put all the good data stuffs here");
+        vicmil::json::Json j = vicmil::json::Json();
+        j["description"] = "This is some sample energy data over time!";
+        j["time_data_s"] = std::vector<double>({1.0, 2.0, 3.0, 4.0, 5.0});
+        j["energy_data_J"] = std::vector<double>({1.0, 6, 8, 10, 15});
+        
+        std::string json_str = j.to_string();
+        vicmil::browser::download_text_file("data.txt", json_str);
     }
 
     vicmil::app::draw2d_text(

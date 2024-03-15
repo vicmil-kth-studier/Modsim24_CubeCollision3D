@@ -1,12 +1,12 @@
 #pragma once
 #include "../N1_vicmil_std_lib/vicmil_std_lib.h"
-#include "../../dependencies/glm/glm/glm.hpp"
-#include "../../dependencies/glm/glm/gtc/matrix_transform.hpp"
-#include "../../dependencies/glm/glm/gtx/transform.hpp"
-#include "../../dependencies/glm/glm/ext/matrix_transform.hpp" // perspective, translate, rotate
-#include "../../dependencies/glm/glm/gtc/quaternion.hpp"
-#include "../../dependencies/glm/glm/gtx/quaternion.hpp"
-#include "../../dependencies/glm/glm/gtx/string_cast.hpp"
+#include "../external_libraries/glm/glm/glm.hpp"
+#include "../external_libraries/glm/glm/gtc/matrix_transform.hpp"
+#include "../external_libraries/glm/glm/gtx/transform.hpp"
+#include "../external_libraries/glm/glm/ext/matrix_transform.hpp" // perspective, translate, rotate
+#include "../external_libraries/glm/glm/gtc/quaternion.hpp"
+#include "../external_libraries/glm/glm/gtx/quaternion.hpp"
+#include "../external_libraries/glm/glm/gtx/string_cast.hpp"
 
 namespace vicmil {
 glm::dvec3 project_vector_onto_vector(glm::dvec3 vector, glm::dvec3 on_vector) {

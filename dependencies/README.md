@@ -1,6 +1,6 @@
 Here are all the external libraries, compilers etc that are necessary to build and run the project
 
-All the dependencies found in the project can be found below. For each dependency, there exists a link to the original website from where you can download the material
+All the extra dependencies in the project can be found below. For each dependency, there exists a link to the original website from where you can download the material
 
 Just put the files in the appropriate folder
 
@@ -42,14 +42,4 @@ This project has the following dependencies
         Links:
             Should already work if you have emscripten.
             To run locally, just download the necessary .lib file and link into the project
-
-    GLM:
-        Maths library, with support for linear algebra, rotations etc. The library
-            is headers only so it is really easy to include into projects
-
-        Path:
-            dependencies/glm/
-
-        Links:
-            github: https://github.com/g-truc/glm
 
