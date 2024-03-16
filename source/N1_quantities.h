@@ -46,8 +46,8 @@ public:
         glm::dvec3 rotation_axis = glm::cross(vec_from, vec_to);
         if(glm::length(rotation_axis) == 0) {
             // 180 degree rotation, any direction that is orthogonal
-            glm::dvec3 rotation_axis = glm::dvec3(vec_from.y, vec_from.x, vec_from.z);
-            return Rotation::from_axis_rotation(vicmil::PI, rotation_axis);
+            glm::dvec3 rotation_axis = glm::cross(glm::dvec3(vec_from.y, vec_from.x, vec_from.z), vec_from);
+            return Rotation::from_axis_rotation(vicmil::PI, glm::normalize(rotation_axis));
         }
 
         // Determine how many degrees to rotate

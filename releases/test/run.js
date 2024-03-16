@@ -960,6 +960,10 @@ function dbg(...args) {
 }
 // end include: runtime_debug.js
 // === Body ===
+
+function _alert(alert_str,len_alert_str) { alert(UTF8ToString(alert_str, len_alert_str)); }
+function _download_file(filename_ptr,len_filename,file_contents_ptr,len_file_contents) { const filename = UTF8ToString(filename_ptr, len_filename); const file_contents = UTF8ToString(file_contents_ptr, len_file_contents); const file = new File([file_contents], filename, { type: 'text/plain', }); const link = document.createElement('a'); const url = URL.createObjectURL(file); link.href = url; link.download = file.name; document.body.appendChild(link); link.click(); document.body.removeChild(link); window.URL.revokeObjectURL(url); }
+
 // end include: preamble.js
 
 
@@ -4736,7 +4740,8 @@ var dynCall_viijii = Module['dynCall_viijii'] = createExportWrapper('dynCall_vii
 var dynCall_iiiiij = Module['dynCall_iiiiij'] = createExportWrapper('dynCall_iiiiij');
 var dynCall_iiiiijj = Module['dynCall_iiiiijj'] = createExportWrapper('dynCall_iiiiijj');
 var dynCall_iiiiiijj = Module['dynCall_iiiiiijj'] = createExportWrapper('dynCall_iiiiiijj');
-
+var ___start_em_js = Module['___start_em_js'] = 123596;
+var ___stop_em_js = Module['___stop_em_js'] = 124245;
 
 // include: postamble.js
 // === Auto-generated postamble setup entry stuff ===
