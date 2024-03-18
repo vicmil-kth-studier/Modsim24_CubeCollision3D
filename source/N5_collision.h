@@ -113,118 +113,160 @@ void get_two_lowest_points_along_axis(std::vector<glm::dvec3> points, glm::dvec3
     }
 }
 
+struct IntersectionResolution {
+    glm::dvec3 new_obj1_pos;
+    glm::dvec3 new_obj2_pos;
+    glm::dvec3 collision_position;
+    glm::dvec3 collision_axis; // The collision axis will signal the direction to apply force to obj1
+    bool is_collision = true;
+};
+
+// If the axis is not aligned along vector, flip it
+glm::dvec3 align_axis_along_vector(glm::dvec3 axis, glm::dvec3 vec) {
+    vicmil::Line line;
+    line.point = glm::dvec3(0, 0, 0);
+    line.vector = axis;
+
+    double p = project_point_to_line(vec, line);
+    if(p < 0) {
+        return -axis;
+    }
+    return axis;
+}
+void handle_cube_separation_along_axis(
+    const Cube& cube1, 
+    const Cube& cube2, 
+    double overlap, 
+    glm::dvec3 move_cube1_axis, 
+    glm::dvec3* new_cube1_pos, 
+    glm::dvec3* new_cube2_pos) {
+    glm::dvec3 axis = glm::normalize(move_cube1_axis);
+    double tot_inv_mass = 1.0/cube1.mass_kg + 1.0/cube2.mass_kg;
+    *new_cube1_pos = cube1.trajectory.orientation.center_of_mass + (overlap+0.01) * axis * (1.0/cube1.mass_kg) / tot_inv_mass;
+    *new_cube2_pos = cube2.trajectory.orientation.center_of_mass - (overlap+0.01) * axis * (1.0/cube2.mass_kg) / tot_inv_mass;
+    return;
+}
+IntersectionResolution handle_face1_collision(const Cube& cube1, const Cube& cube2, const Overlap& overlap_) {
+    START_TRACE_FUNCTION();
+    IntersectionResolution intersection_resolution;
+
+    // Align axis in direction that cube1 should move
+    glm::dvec3 axis = align_axis_along_vector(overlap_.axis, cube1.trajectory.orientation.center_of_mass - cube2.trajectory.orientation.center_of_mass);
+    intersection_resolution.collision_axis = axis;
+
+    // Determine new cube positions to separate cubes
+    handle_cube_separation_along_axis(cube1, cube2, overlap_.overlap, axis, &intersection_resolution.new_obj1_pos, &intersection_resolution.new_obj2_pos);
+
+    // Determine where the objects are colliding
+    Cube cube_copy = cube2;
+    cube_copy.trajectory.orientation.center_of_mass = intersection_resolution.new_obj2_pos;
+    std::vector<glm::dvec3> corners = cube_copy.get_corner_positions();
+    int lowest_point = vicmil::get_lowest_point_along_axis(corners, -axis);
+    intersection_resolution.collision_position = corners[lowest_point];
+
+    return intersection_resolution;
+}
+IntersectionResolution handle_face2_collision(const Cube& cube1, const Cube& cube2, const Overlap& overlap_) {
+    START_TRACE_FUNCTION();
+    IntersectionResolution intersection_resolution;
+
+    // Align axis in direction that cube1 should move
+    glm::dvec3 axis = align_axis_along_vector(overlap_.axis, cube1.trajectory.orientation.center_of_mass - cube2.trajectory.orientation.center_of_mass);
+    intersection_resolution.collision_axis = axis;
+
+    // Determine new cube positions to separate cubes
+    handle_cube_separation_along_axis(cube1, cube2, overlap_.overlap, axis, &intersection_resolution.new_obj1_pos, &intersection_resolution.new_obj2_pos);
+
+    // Determine where the objects are colliding
+    Cube cube_copy = cube1;
+    cube_copy.trajectory.orientation.center_of_mass = intersection_resolution.new_obj1_pos;
+    std::vector<glm::dvec3> corners = cube_copy.get_corner_positions();
+    int lowest_point = vicmil::get_lowest_point_along_axis(corners, axis);
+    intersection_resolution.collision_position = corners[lowest_point];
+
+    return intersection_resolution;
+}   
+IntersectionResolution handle_edge_collision(const Cube& cube1, const Cube& cube2, const Overlap& overlap_) {
+    START_TRACE_FUNCTION();
+    IntersectionResolution intersection_resolution;
+
+    // Align axis in direction that cube1 should move
+    glm::dvec3 axis = align_axis_along_vector(overlap_.axis, cube1.trajectory.orientation.center_of_mass - cube2.trajectory.orientation.center_of_mass);
+    intersection_resolution.collision_axis = axis;
+
+    // Determine new cube positions to separate cubes
+    handle_cube_separation_along_axis(cube1, cube2, overlap_.overlap, axis, &intersection_resolution.new_obj1_pos, &intersection_resolution.new_obj2_pos);
+
+    // Determine where the objects are colliding
+    // In the edge case, pick the points closest and then calculate where they intersect
+    Cube cube1_copy = cube1;
+    cube1_copy.trajectory.orientation.center_of_mass = intersection_resolution.new_obj1_pos;
+    std::vector<glm::dvec3> cube1_corners = cube1_copy.get_corner_positions();
+    int cube1_corner1;
+    int cube1_corner2;
+    get_two_lowest_points_along_axis(cube1_corners, axis, &cube1_corner1, &cube1_corner2);
+
+    Cube cube2_copy = cube2;
+    cube2_copy.trajectory.orientation.center_of_mass = intersection_resolution.new_obj2_pos;
+    std::vector<glm::dvec3> cube2_corners = cube2_copy.get_corner_positions();
+    int cube2_corner1;
+    int cube2_corner2;
+    get_two_lowest_points_along_axis(cube2_corners, -axis, &cube2_corner1, &cube2_corner2);
+
+    // Get where on the edge they are colliding
+    vicmil::Line line;
+    line.point = cube2_corners[cube2_corner1];
+    line.vector = cube2_corners[cube2_corner1] - cube2_corners[cube2_corner2];
+    vicmil::get_closest_point_on_line_segment_to_line(cube1_corners[cube1_corner1], cube1_corners[cube1_corner2], line);
+
+    return intersection_resolution;
+}
+IntersectionResolution get_cube_cube_intersection_resolution(const Cube& cube1, const Cube& cube2) {
+    //1: determine if the cube1 is colliding with cube2
+    Overlap overlap_faces1 = get_cube_cube_overlap_along_faces(cube1, cube2);
+    Overlap overlap_faces2 = get_cube_cube_overlap_along_faces(cube2, cube1);
+    Overlap overlap_edge_pairs = get_cube_cube_overlap_along_edge_pairs(cube1, cube2);
+
+    DebugExpr(overlap_faces1.overlap);
+    DebugExpr(overlap_faces2.overlap);
+    DebugExpr(overlap_edge_pairs.overlap);
+
+    // The there is no overlap along one of the axis, then there is no collision!
+    if(overlap_faces1.overlap <= 0 || overlap_faces2.overlap <= 0 || overlap_edge_pairs.overlap <= 0) {
+        IntersectionResolution intersection_resolution;
+        intersection_resolution.is_collision = false;
+        return intersection_resolution;
+    }
+    if(overlap_faces1.overlap <= overlap_faces2.overlap && overlap_faces1.overlap <= overlap_edge_pairs.overlap) {
+        return handle_face1_collision(cube1, cube2, overlap_faces1);
+    }
+    if(overlap_faces2.overlap <= overlap_faces1.overlap && overlap_faces2.overlap <= overlap_edge_pairs.overlap) {
+        return handle_face2_collision(cube1, cube2, overlap_faces2);
+    }
+    if(overlap_edge_pairs.overlap <= overlap_faces1.overlap && overlap_edge_pairs.overlap <= overlap_faces2.overlap) {
+        return handle_edge_collision(cube1, cube2, overlap_edge_pairs);
+    }
+
+    ThrowError("Should be unreachable!");
+}
+
 /**
  * Fully resolve cube-cube collision
  * The collision is resolved by finding the contact point, contact normal, and then applying the correct impulse there
  * @return the impulse magnitude, it will be 0 if there was no collision
 */
 ContactImpulse handle_cube_cube_collision(Cube& cube1, Cube& cube2, double restitution_constant = 0.8) {
-    //1: determine if the cube1 is colliding with cube2
-    Overlap overlap_faces1 = get_cube_cube_overlap_along_faces(cube1, cube2);
-    Overlap overlap_faces2 = get_cube_cube_overlap_along_faces(cube2, cube1);
-    Overlap overlap_edge_pairs = get_cube_cube_overlap_along_edge_pairs(cube1, cube2);
-
-    // Debug("overlap: " << overlap_faces1.overlap << ", " << overlap_faces2.overlap << ", " << overlap_edge_pairs.overlap);
-
-    Overlap min_overlap = overlap_faces1;
-    int overlap_case = 1;
-
-    if(min_overlap.overlap > overlap_faces2.overlap) {
-        min_overlap = overlap_faces2;
-        overlap_case = 2;
+    IntersectionResolution intersection_resolution = get_cube_cube_intersection_resolution(cube1, cube2);
+    if(!intersection_resolution.is_collision) {
+        return ContactImpulse::zero(); // No intersection
     }
-
-    if(min_overlap.overlap > overlap_edge_pairs.overlap) {
-        min_overlap = overlap_edge_pairs;
-        overlap_case = 3;
-    }
-
-    // DebugExpr(overlap_case);
-
-    if(min_overlap.overlap <= 0) {
-        return ContactImpulse::zero(); // No overlap
-    }
-
-    // Debug("overlap_case >>>>>> " << overlap_case);
-
-    min_overlap.axis = glm::normalize(min_overlap.axis);
-
-    //2: separate the cube1 and cube2(since due to the time steps they might intersect)
-    //     do this with the shortest distance
-    vicmil::Line line;
-    line.point = glm::dvec3(0, 0, 0);
-    line.vector = min_overlap.axis;
-    double p1 = vicmil::project_point_to_line(cube1.trajectory.orientation.center_of_mass, line);
-    double p2 = vicmil::project_point_to_line(cube2.trajectory.orientation.center_of_mass, line);
-    if(p1 < p2) {
-        min_overlap.axis = -min_overlap.axis;
-    }
-
-    // Separate the objects depending on their mass
-    double tot_inv_mass = 1.0/cube1.mass_kg + 1.0/cube2.mass_kg;
-    cube1.trajectory.orientation.center_of_mass += (min_overlap.overlap+0.01) * min_overlap.axis * (1.0/cube1.mass_kg) / tot_inv_mass;
-    cube2.trajectory.orientation.center_of_mass -= (min_overlap.overlap+0.01) * min_overlap.axis * (1.0/cube2.mass_kg) / tot_inv_mass;
-
-    ContactPointInfo contact;
-    contact.contact_normal = glm::normalize(min_overlap.axis);
-
-    //3: calculate the impact position
-    if(overlap_case == 1) {
-        // In the face1 case, pick the point closest to the middle in cube2
-        std::vector<glm::dvec3> corners = cube2.get_corner_positions();
-        int lowest_point = vicmil::get_lowest_point_along_axis(corners, -min_overlap.axis);
-        contact.contact_position = corners[lowest_point];
-    }
-
-    else if(overlap_case == 2) {
-        // In the face2 case, pick the point closest to the middle in cube1
-        std::vector<glm::dvec3> corners = cube1.get_corner_positions();
-        int lowest_point = vicmil::get_lowest_point_along_axis(corners, min_overlap.axis);
-        contact.contact_position = corners[lowest_point];
-    }
-    else {
-        // In the edge case, pick the points closest and then calculate where they intersect
-        std::vector<glm::dvec3> cube1_corners = cube1.get_corner_positions();
-        int cube1_corner1;
-        int cube1_corner2;
-        get_two_lowest_points_along_axis(cube1_corners, min_overlap.axis, &cube1_corner1, &cube1_corner2);
-
-        std::vector<glm::dvec3> cube2_corners = cube2.get_corner_positions();
-        int cube2_corner1;
-        int cube2_corner2;
-        get_two_lowest_points_along_axis(cube2_corners, -min_overlap.axis, &cube2_corner1, &cube2_corner2);
-
-        // Now we can determine where they intersect
-        vicmil::Line edge1;
-        edge1.point = cube1_corners[cube1_corner1];
-        edge1.vector = cube1_corners[cube1_corner1] - cube1_corners[cube1_corner2];
-        vicmil::Line edge2;
-        edge2.point = cube2_corners[cube2_corner1];
-        edge2.vector = cube2_corners[cube2_corner1] - cube2_corners[cube2_corner2];
-        glm::dvec3 point1;
-        glm::dvec3 point2;
-        vicmil::get_closest_points_between_two_lines(edge1, edge2, &point1, &point2);
-
-        // Limit the point to be on one of the edges
-        double val1 = project_point_to_line(cube1_corners[cube1_corner1], edge1);
-        double val2 = project_point_to_line(cube1_corners[cube1_corner2], edge1);
-        double val3 = project_point_to_line(point1, edge1);
-        if(val3 > val1 && val3 > val2) {
-            double val = std::max(val1, val2);
-            contact.contact_position = edge1.point + edge1.vector * val;
-        }
-        else if(val3 < val1 && val3 < val2) {
-            double val = std::min(val1, val2);
-            contact.contact_position = edge1.point + edge1.vector * val;
-        }
-        else {
-            contact.contact_position = point1; // The point is at an acceptable position
-        }
-    }
+    cube1.trajectory.orientation.center_of_mass = intersection_resolution.new_obj1_pos;
+    cube2.trajectory.orientation.center_of_mass = intersection_resolution.new_obj2_pos;
 
     //4: apply the correct impulse magnitude at the contact
-    ContactImpulse impulse;
-    impulse.position = contact.contact_position;
+    ContactPointInfo contact;
+    contact.contact_normal = intersection_resolution.collision_axis;
+    contact.contact_position = intersection_resolution.collision_position;
 
     ObjectShapeProperty cube1_shape = cube1.get_shape_property();
     ObjectShapeProperty cube2_shape = cube2.get_shape_property();
@@ -239,6 +281,9 @@ ContactImpulse handle_cube_cube_collision(Cube& cube1, Cube& cube2, double resti
     if(impulse_magnitude < 0) {
         return ContactImpulse::zero(); // Negative collision
     }
+
+    ContactImpulse impulse;
+    impulse.position = intersection_resolution.collision_position;
     impulse.impulse.impulse_newton_s = glm::normalize(contact.contact_normal) * impulse_magnitude;
     apply_impulse(impulse, cube1.trajectory, cube1_shape);
     impulse.impulse.impulse_newton_s = -impulse.impulse.impulse_newton_s;

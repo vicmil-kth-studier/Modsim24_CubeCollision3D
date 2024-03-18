@@ -172,6 +172,42 @@ void get_closest_points_between_two_lines(Line line1, Line line2, glm::dvec3* po
 }
 
 /**
+ * We can represent a line segment as the line between two points
+ * We then want to know what point on this line segment that is closer to a line
+*/
+glm::dvec3 get_closest_point_on_line_segment_to_line(const glm::dvec3& segment_p1, const glm::dvec3& segment_p2, const Line& line) {
+    // Now we can determine where they intersect
+
+    Line line_segment_line;
+    line_segment_line.point = segment_p1;
+    line_segment_line.vector = segment_p1 - segment_p2;
+    
+    glm::dvec3 closest_point_on_line_segment_line;
+    glm::dvec3 other_point;
+    vicmil::get_closest_points_between_two_lines(line_segment_line, line, &closest_point_on_line_segment_line, &other_point);
+
+    // Limit the point to be on line segment
+    double val_p1 = project_point_to_line(segment_p1, line_segment_line);
+    double val_p2 = project_point_to_line(segment_p2, line_segment_line);
+    double val_closest = project_point_to_line(closest_point_on_line_segment_line, line_segment_line);
+    if(val_closest > val_p1 && val_closest > val_p2) { // See if the closest point is outside line segment
+        if(val_p1 > val_p2) {
+            return segment_p1;
+        }
+        return segment_p2;
+    }
+    else if(val_closest < val_p1 && val_closest < val_p2) { // See if the closest point is outside line segment
+        if(val_p1 < val_p2) {
+            return segment_p1;
+        }
+        return segment_p2;
+    }
+    else {
+        return closest_point_on_line_segment_line;
+    }
+}
+
+/**
  * If we were to project all points to some axis, which would be the lowest point?
  * @return The index if the lowest point
 */

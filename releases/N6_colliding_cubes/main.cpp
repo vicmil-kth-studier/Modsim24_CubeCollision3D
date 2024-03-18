@@ -1,5 +1,5 @@
 #define USE_DEBUG
-#define DEBUG_KEYWORDS "!vicmil_lib,init(),main(),handle_cube_cube_collision" 
+#define DEBUG_KEYWORDS "!vicmil_lib" 
 #include "../../source/cubecollision_include.h"
 
 using namespace vicmil;
@@ -123,6 +123,12 @@ void render() {
     text_button.draw();
     if(text_button.is_pressed(mouse_state) && start_pressed == false) {
         start_pressed = true;
+    }
+    text_button.center_y -= 0.1;
+    text_button.text = "PAUSE";
+    text_button.draw();
+    if(text_button.is_pressed(mouse_state) && start_pressed == true) {
+        start_pressed = false;
     }
 
     vicmil::app::draw2d_text(

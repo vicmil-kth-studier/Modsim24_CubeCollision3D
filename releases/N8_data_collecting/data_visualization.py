@@ -22,9 +22,12 @@ y1 = data["total_energy_data_J"]
 y2 = data["kinetic_energy_J"]
 y3 = data["potential_energy_J"]
 
-plt.plot(x, y1)
-plt.plot(x, y2)
-plt.plot(x, y3)
+plt.plot(x, y1, label="total energy")
+plt.plot(x, y2, label ="kinetic energy")
+plt.plot(x, y3, label ="potential energy")
 
-plt.title("Title")
+plt.title("Dropped cube energy plot")
+plt.legend()
+plt.xlabel("Time[s]")
+plt.ylabel("Energy[joule]")
 plt.show()

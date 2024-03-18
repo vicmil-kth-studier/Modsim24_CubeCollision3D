@@ -154,8 +154,8 @@ Overlap get_cube_cube_overlap_along_edge_pairs(Cube cube1, Cube cube2) {
         glm::cross(cube1_face_axis[2], cube2_face_axis[2]),
     };
     
-    glm::dvec3 min_overlap_axis = edge_pair_axis[0];
-    double min_overlap = get_cube_cube_overlap_along_axis(cube1, cube2, edge_pair_axis[0]);
+    glm::dvec3 min_overlap_axis = glm::dvec3(0, 1, 0); // Some vector
+    double min_overlap = 10000000; // Large number
     for(int i = 0; i < 9; i++) {
         glm::dvec3 axis = edge_pair_axis[i];
         if(glm::length2(axis) > 0.00001) { // Only pick valid axis
@@ -167,8 +167,11 @@ Overlap get_cube_cube_overlap_along_edge_pairs(Cube cube1, Cube cube2) {
             }
         }
     }
+    //DebugExpr(glm::to_string(min_overlap_axis));
+    //DebugExpr(min_overlap);
     Overlap overlap;
     overlap.axis = min_overlap_axis;
     overlap.overlap = min_overlap;
+    Assert(glm::length(overlap.axis) > 0.000001);
     return overlap;
 }
