@@ -278,16 +278,18 @@ ContactImpulse handle_cube_cube_collision(Cube& cube1, Cube& cube2, double resti
     impulse_resolver.contact_point = contact;
     impulse_resolver.restitution_constant = restitution_constant;
     double impulse_magnitude = impulse_resolver.get_impulse_magnitude();
-    if(impulse_magnitude < 0) {
-        return ContactImpulse::zero(); // Negative collision
-    }
 
     ContactImpulse impulse;
     impulse.position = intersection_resolution.collision_position;
     impulse.impulse.impulse_newton_s = glm::normalize(contact.contact_normal) * impulse_magnitude;
-    apply_impulse(impulse, cube1.trajectory, cube1_shape);
-    impulse.impulse.impulse_newton_s = -impulse.impulse.impulse_newton_s;
-    apply_impulse(impulse, cube2.trajectory, cube2_shape);
+
+    if(impulse_magnitude > 0) {
+        // Only apply impulse so objects move away from each other
+        apply_impulse(impulse, cube1.trajectory, cube1_shape);
+        impulse.impulse.impulse_newton_s = -impulse.impulse.impulse_newton_s;
+        apply_impulse(impulse, cube2.trajectory, cube2_shape);
+    }
+    
 
     return impulse;
 }

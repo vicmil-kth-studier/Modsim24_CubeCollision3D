@@ -1,5 +1,5 @@
 #define USE_DEBUG
-#define DEBUG_KEYWORDS "!vicmil_lib" 
+#define DEBUG_KEYWORDS "!vicmil_lib,N5_colli" 
 #include "../../source/cubecollision_include.h"
 
 using namespace vicmil;
@@ -164,7 +164,7 @@ void init() {
 
     cube1 = Cube();
     cube1.trajectory.orientation.center_of_mass.x = -2.0;
-    cube1.trajectory.orientation.center_of_mass.y = 4.0;
+    cube1.trajectory.orientation.center_of_mass.y = 0.0;
     cube1.trajectory.orientation.center_of_mass.z = -15.0;
     
     cube1.side_length_m = 1;
@@ -173,13 +173,13 @@ void init() {
 
     cube2 = Cube();
     cube2.trajectory.orientation.center_of_mass.x = 2.0;
-    cube2.trajectory.orientation.center_of_mass.y = 4.0;
+    cube2.trajectory.orientation.center_of_mass.y = 0.0;
     cube2.trajectory.orientation.center_of_mass.z = -15.0;
 
     cube2.side_length_m = 1;
     cube2.mass_kg = 10;
 
-    vicmil::app::globals::main_app->camera.position.y = 6;
+    vicmil::app::globals::main_app->camera.position.y = -3;
 }
 
 
