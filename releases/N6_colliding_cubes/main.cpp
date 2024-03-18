@@ -63,7 +63,6 @@ void render() {
     vicmil::app::draw2d_text(info_str, -1.0, 1.0, 0.02, screen_aspect_ratio);
 
     // Create buttons for moving around
-    // Create buttons for moving around
     vicmil::app::TextButton text_button;
     text_button.text = "CUBE1 ROTATE1";
     text_button.center_x = 0.5;

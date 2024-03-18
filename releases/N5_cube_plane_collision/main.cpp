@@ -56,40 +56,57 @@ void render() {
     text_button.screen_height_pixels = screen_height_pixels;
 
     text_button.draw();
-    if(text_button.is_pressed(mouse_state) && start_pressed == false) {
-        cube.trajectory.orientation.rotational_orientation =
-            cube.trajectory.orientation.rotational_orientation.rotate(Rotation::from_axis_rotation(0.02, glm::dvec3(1, 0, 0)));
+    if(text_button.is_pressed(mouse_state)) {
+        cube.trajectory.orientation.center_of_mass.y += 0.1;
     }
 
-    text_button.center_y = 0.1;
+    text_button.center_y -= 0.1;
     text_button.text = "DOWN";
     text_button.draw();
-    if(text_button.is_pressed(mouse_state) && start_pressed == false) {
-        cube.trajectory.orientation.rotational_orientation =
-            cube.trajectory.orientation.rotational_orientation.rotate(Rotation::from_axis_rotation(-0.02, glm::dvec3(1, 0, 0)));
+    if(text_button.is_pressed(mouse_state)) {
+        cube.trajectory.orientation.center_of_mass.y -= 0.1;
     }
 
-    text_button.center_y = 0.15;
-    text_button.center_x = 0.35;
+    text_button.center_y -= 0.1;
     text_button.text = "LEFT";
     text_button.draw();
-    if(text_button.is_pressed(mouse_state) && start_pressed == false) {
-        cube.trajectory.orientation.rotational_orientation =
-            cube.trajectory.orientation.rotational_orientation.rotate(Rotation::from_axis_rotation(0.02, glm::dvec3(0, 1, 0)));
+    if(text_button.is_pressed(mouse_state)) {
+        cube.trajectory.orientation.center_of_mass.x -= 0.1;
     }
 
-    text_button.center_y = 0.15;
-    text_button.center_x = 0.65;
+    text_button.center_y -= 0.1;
     text_button.text = "RIGHT";
     text_button.draw();
-    if(text_button.is_pressed(mouse_state) && start_pressed == false) {
-        cube.trajectory.orientation.rotational_orientation =
-            cube.trajectory.orientation.rotational_orientation.rotate(Rotation::from_axis_rotation(-0.02, glm::dvec3(0, 1, 0)));
+    if(text_button.is_pressed(mouse_state)) {
+        cube.trajectory.orientation.center_of_mass.x += 0.1;
+    }
+
+    text_button.center_y -= 0.1;
+    text_button.text = "ROTATE1";
+    text_button.draw();
+    if(text_button.is_pressed(mouse_state)) {
+        cube.trajectory.orientation.rotational_orientation = cube.trajectory.orientation.rotational_orientation.rotate(
+            Rotation::from_scaled_axis({0.1, 0.0, 0}));
+    }
+
+    text_button.center_y -= 0.1;
+    text_button.text = "ROTATE2";
+    text_button.draw();
+    if(text_button.is_pressed(mouse_state)) {
+        cube.trajectory.orientation.rotational_orientation = cube.trajectory.orientation.rotational_orientation.rotate(
+            Rotation::from_scaled_axis({0, 0.1, 0}));
+    }
+
+    text_button.center_y -= 0.1;
+    text_button.text = "ROTATE3";
+    text_button.draw();
+    if(text_button.is_pressed(mouse_state)) {
+        cube.trajectory.orientation.rotational_orientation = cube.trajectory.orientation.rotational_orientation.rotate(
+            Rotation::from_scaled_axis({0, 0, 0.1}));
     }
 
 
-    text_button.center_y = -0.6;
-    text_button.center_x = 0.5;
+    text_button.center_y -= 0.1;
     text_button.text = "START";
     text_button.draw();
     if(text_button.is_pressed(mouse_state) && start_pressed == false) {
